@@ -90,6 +90,8 @@
   },
   "view": {
     "backToDashboard": "Back to Dashboard",
+    "bracket": "Bracket",
+    "matches": "Matches",
     "currentMatches": "Current Matches",
     "noMatches": "No matches available",
     "standings": "Standings",

@@ -1,7 +1,7 @@
 /**
  * Tournament View
  * Main view for managing an active tournament
- * Shows matches, standings, and allows recording results
+ * Shows matches, standings, and allows recording results with tabbed interface
  */
 
 import { useState, useEffect } from 'react';
@@ -9,7 +9,11 @@ import { useTranslation } from 'react-i18next';
 import { loadTournamentState, saveTournamentState } from '../../lib/storage/localStorage';
 import { restoreTournament } from '../../lib/tournaments/factory';
 import type { BaseTournament } from '../../lib/tournaments/BaseTournament';
-import type { Match, Standing, MatchResult } from '../../lib/tournaments/types';
+import type { Match, Standing, MatchResult, TournamentState } from '../../lib/tournaments/types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import SingleEliminationBracket from './brackets/SingleEliminationBracket';
+import DoubleEliminationBracket from './brackets/DoubleEliminationBracket';
+import MatchList from './MatchList';
 
 interface Props {
   tournamentId: string;
@@ -19,6 +23,7 @@ interface Props {
 export default function TournamentView({ tournamentId, onBack }: Props) {
   const { t } = useTranslation();
   const [tournament, setTournament] = useState<BaseTournament | null>(null);
+  const [tournamentState, setTournamentState] = useState<TournamentState | null>(null);
   const [currentMatches, setCurrentMatches] = useState<Match[]>([]);
   const [standings, setStandings] = useState<Standing[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
@@ -36,6 +41,7 @@ export default function TournamentView({ tournamentId, onBack }: Props) {
 
       const restored = restoreTournament(state);
       setTournament(restored);
+      setTournamentState(state);
       setCurrentMatches(restored.getCurrentMatches());
       setStandings(restored.getStandings());
       setLoading(false);
@@ -51,9 +57,10 @@ export default function TournamentView({ tournamentId, onBack }: Props) {
     setCurrentMatches(tournament.getCurrentMatches());
     setStandings(tournament.getStandings());
 
-    // Save to localStorage
+    // Save to localStorage and update state
     const state = tournament.export();
     saveTournamentState(state);
+    setTournamentState(state);
   };
 
   const handleRecordResult = (matchId: string, result: MatchResult) => {
@@ -66,6 +73,20 @@ export default function TournamentView({ tournamentId, onBack }: Props) {
     } catch (err) {
       alert(err instanceof Error ? err.message : t('view.resultError'));
     }
+  };
+
+  const handleMatchClick = (match: Match) => {
+    if (match.participantIds.length === 2 && match.status !== 'completed') {
+      setSelectedMatch(match);
+    }
+  };
+
+  const hasBracketView = (type: string): boolean => {
+    return type === 'single-elimination' || type === 'double-elimination';
+  };
+
+  const shouldGroupByRounds = (type: string): boolean => {
+    return type === 'round-robin' || type === 'swiss' || type === 'free-for-all';
   };
 
   if (loading) {
@@ -146,96 +167,110 @@ export default function TournamentView({ tournamentId, onBack }: Props) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Current Matches */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('view.currentMatches')}</h2>
-
-            {currentMatches.length === 0 ? (
-              <p className="text-sm text-gray-500">{t('view.noMatches')}</p>
-            ) : (
-              <div className="space-y-3">
-                {currentMatches.map((match) => (
-                  <div
-                    key={match.id}
-                    className="border border-gray-200 rounded-lg p-4 hover:border-blue-500 cursor-pointer transition-colors"
-                    onClick={() => setSelectedMatch(match)}
-                  >
-                    {match.participantIds.length === 1 ? (
-                      <p className="text-sm text-gray-600">
-                        {getParticipantName(match.participantIds[0])} {t('view.bye')}
-                      </p>
-                    ) : (
-                      <>
-                        <div className="space-y-2">
-                          {match.participantIds.map((pid) => (
-                            <div key={pid} className="text-sm font-medium text-gray-900">
-                              {getParticipantName(pid)}
-                            </div>
-                          ))}
-                        </div>
-                        {match.round && (
-                          <p className="text-xs text-gray-500 mt-2">{t('view.round', { number: match.round })}</p>
-                        )}
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
+        {/* Tabbed Content */}
+        <Tabs defaultValue={hasBracketView(tournament.getType()) ? "bracket" : "matches"} className="w-full">
+          <TabsList className="grid w-full max-w-md" style={{ gridTemplateColumns: hasBracketView(tournament.getType()) ? '1fr 1fr 1fr' : '1fr 1fr' }}>
+            {hasBracketView(tournament.getType()) && (
+              <TabsTrigger value="bracket">{t('view.bracket') || 'Bracket'}</TabsTrigger>
             )}
-          </div>
+            <TabsTrigger value="matches">{t('view.matches') || 'Matches'}</TabsTrigger>
+            <TabsTrigger value="standings">{t('view.standings')}</TabsTrigger>
+          </TabsList>
 
-          {/* Standings */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('view.standings')}</h2>
+          {/* Bracket Tab - Only for Single/Double Elimination */}
+          {hasBracketView(tournament.getType()) && (
+            <TabsContent value="bracket" className="mt-6">
+              <div className="bg-white shadow rounded-lg">
+                {tournament.getType() === 'single-elimination' && tournamentState?.type === 'single-elimination' && (
+                  <SingleEliminationBracket
+                    bracket={tournamentState.bracket}
+                    thirdPlaceMatch={tournamentState.thirdPlaceMatch}
+                    participants={tournament.getParticipants()}
+                    onMatchClick={handleMatchClick}
+                  />
+                )}
+                {tournament.getType() === 'double-elimination' && tournamentState?.type === 'double-elimination' && (
+                  <DoubleEliminationBracket
+                    winnersBracket={tournamentState.winnersBracket}
+                    losersBracket={tournamentState.losersBracket}
+                    grandFinal={tournamentState.grandFinal}
+                    grandFinalReset={tournamentState.grandFinalReset}
+                    participants={tournament.getParticipants()}
+                    onMatchClick={handleMatchClick}
+                  />
+                )}
+              </div>
+            </TabsContent>
+          )}
 
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                      {t('view.rank')}
-                    </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                      {t('view.participant')}
-                    </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                      {t('view.wlt')}
-                    </th>
-                    {standings.some((s) => s.points !== undefined) && (
+          {/* Matches Tab - List View */}
+          <TabsContent value="matches" className="mt-6">
+            <div className="bg-white shadow rounded-lg p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('view.currentMatches')}</h2>
+
+              <MatchList
+                matches={currentMatches}
+                participants={tournament.getParticipants()}
+                onMatchClick={handleMatchClick}
+                groupByRounds={shouldGroupByRounds(tournament.getType())}
+                showRoundHeaders={shouldGroupByRounds(tournament.getType())}
+              />
+            </div>
+          </TabsContent>
+
+          {/* Standings Tab */}
+          <TabsContent value="standings" className="mt-6">
+            <div className="bg-white shadow rounded-lg p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('view.standings')}</h2>
+
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead>
+                    <tr>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        {t('view.points')}
+                        {t('view.rank')}
                       </th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {standings.map((standing) => (
-                    <tr key={standing.participantId}>
-                      <td className="px-3 py-2 text-sm font-medium text-gray-900">
-                        {standing.rank || '-'}
-                      </td>
-                      <td className="px-3 py-2 text-sm text-gray-900">
-                        {standing.participantName}
-                        {standing.isEliminated && (
-                          <span className="ml-2 text-xs text-red-600">{t('view.eliminated')}</span>
-                        )}
-                      </td>
-                      <td className="px-3 py-2 text-sm text-gray-600">
-                        {standing.wins}-{standing.losses}-{standing.ties}
-                      </td>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        {t('view.participant')}
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        {t('view.wlt')}
+                      </th>
                       {standings.some((s) => s.points !== undefined) && (
-                        <td className="px-3 py-2 text-sm text-gray-600">
-                          {standing.points || 0}
-                        </td>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                          {t('view.points')}
+                        </th>
                       )}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {standings.map((standing) => (
+                      <tr key={standing.participantId}>
+                        <td className="px-3 py-2 text-sm font-medium text-gray-900">
+                          {standing.rank || '-'}
+                        </td>
+                        <td className="px-3 py-2 text-sm text-gray-900">
+                          {standing.participantName}
+                          {standing.isEliminated && (
+                            <span className="ml-2 text-xs text-red-600">{t('view.eliminated')}</span>
+                          )}
+                        </td>
+                        <td className="px-3 py-2 text-sm text-gray-600">
+                          {standing.wins}-{standing.losses}-{standing.ties}
+                        </td>
+                        {standings.some((s) => s.points !== undefined) && (
+                          <td className="px-3 py-2 text-sm text-gray-600">
+                            {standing.points || 0}
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Match Result Modal */}
         {selectedMatch && (

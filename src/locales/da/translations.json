@@ -90,6 +90,8 @@
   },
   "view": {
     "backToDashboard": "Tilbage til Dashboard",
+    "bracket": "Bracket",
+    "matches": "Kampe",
     "currentMatches": "Nuværende Kampe",
     "noMatches": "Ingen kampe tilgængelige",
     "standings": "Stillinger",
