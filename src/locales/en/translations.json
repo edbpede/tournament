@@ -1,0 +1,114 @@
+{
+  "common": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "export": "Export",
+    "import": "Import",
+    "importing": "Importing...",
+    "loading": "Loading...",
+    "next": "Next",
+    "add": "Add",
+    "create": "Create",
+    "save": "Save",
+    "close": "Close",
+    "confirm": "Confirm",
+    "wins": "wins",
+    "tournament": "Tournament",
+    "tournaments": "Tournaments"
+  },
+  "dashboard": {
+    "title": "Tournament Manager",
+    "newTournament": "+ New Tournament",
+    "noTournaments": "No tournaments",
+    "noTournamentsDescription": "Get started by creating a new tournament.",
+    "tournamentCount_one": "{{count}} tournament",
+    "tournamentCount_other": "{{count}} tournaments",
+    "created": "Created",
+    "updated": "Updated",
+    "importSuccess": "Tournament imported successfully!",
+    "importError": "Failed to import tournament. Please check the file format.",
+    "exportError": "Failed to export tournament.",
+    "deleteConfirm": "Are you sure you want to delete this tournament?"
+  },
+  "status": {
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "notStarted": "Not Started"
+  },
+  "tournamentTypes": {
+    "singleElimination": "Single Elimination",
+    "doubleElimination": "Double Elimination",
+    "roundRobin": "Round Robin",
+    "swiss": "Swiss System",
+    "freeForAll": "Free For All"
+  },
+  "tournamentTypeDescriptions": {
+    "singleElimination": "Loser of each match is eliminated",
+    "doubleElimination": "Participants eliminated after losing two matches",
+    "roundRobin": "Each participant plays all other participants",
+    "swiss": "Participants paired with similar scores",
+    "freeForAll": "Multiple participants per match, winners advance"
+  },
+  "create": {
+    "title": "Create New Tournament",
+    "step": {
+      "type": "Type",
+      "options": "Options",
+      "participants": "Participants"
+    },
+    "selectType": "Select Tournament Type",
+    "tournamentOptions": "Tournament Options",
+    "tournamentName": "Tournament Name",
+    "tournamentNamePlaceholder": "Enter tournament name",
+    "addParticipants": "Add Participants",
+    "participantName": "Participant Name",
+    "participantNamePlaceholder": "Enter participant name",
+    "participantsList": "Participants ({{count}})",
+    "noParticipants": "No participants added yet",
+    "createTournament": "Create Tournament",
+    "errorTitle": "Please fix the following errors:",
+    "duplicateNameError": "Participant names must be unique",
+    "createError": "Failed to create tournament"
+  },
+  "options": {
+    "thirdPlaceMatch": "Include 3rd place match",
+    "tieBreakers": "Break ties with placement matches",
+    "splitStart": "Start with half in losers bracket",
+    "rankingMethod": "Ranking Method",
+    "rankingWins": "Match Wins",
+    "rankingPoints": "Points Scored",
+    "numberOfRounds": "Number of Rounds",
+    "roundsOnce": "1 (each pair plays once)",
+    "roundsTwice": "2 (each pair plays twice)",
+    "roundsThrice": "3 (each pair plays three times)",
+    "pointsPerMatchWin": "Points per Match Win",
+    "pointsPerMatchTie": "Points per Match Tie",
+    "pointsPerGameWin": "Points per Game Win",
+    "pointsPerBye": "Points per Bye",
+    "participantsPerMatch": "Participants per Match"
+  },
+  "view": {
+    "backToDashboard": "Back to Dashboard",
+    "currentMatches": "Current Matches",
+    "noMatches": "No matches available",
+    "standings": "Standings",
+    "rank": "Rank",
+    "participant": "Participant",
+    "wlt": "W-L-T",
+    "points": "Points",
+    "eliminated": "(Eliminated)",
+    "bye": "(Bye)",
+    "round": "Round {{number}}",
+    "recordResult": "Record Match Result",
+    "tournamentNotFound": "Tournament not found",
+    "loadingTournament": "Loading tournament...",
+    "loadError": "Failed to load tournament",
+    "resultError": "Failed to record result"
+  },
+  "language": {
+    "label": "Language",
+    "english": "English",
+    "danish": "Dansk"
+  }
+}

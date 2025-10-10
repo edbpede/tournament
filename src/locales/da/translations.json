@@ -1,0 +1,114 @@
+{
+  "common": {
+    "back": "Tilbage",
+    "cancel": "Annuller",
+    "delete": "Slet",
+    "export": "Eksporter",
+    "import": "Importer",
+    "importing": "Importerer...",
+    "loading": "Indlæser...",
+    "next": "Næste",
+    "add": "Tilføj",
+    "create": "Opret",
+    "save": "Gem",
+    "close": "Luk",
+    "confirm": "Bekræft",
+    "wins": "vinder",
+    "tournament": "Turnering",
+    "tournaments": "Turneringer"
+  },
+  "dashboard": {
+    "title": "Turneringsstyring",
+    "newTournament": "+ Ny Turnering",
+    "noTournaments": "Ingen turneringer",
+    "noTournamentsDescription": "Kom i gang ved at oprette en ny turnering.",
+    "tournamentCount_one": "{{count}} turnering",
+    "tournamentCount_other": "{{count}} turneringer",
+    "created": "Oprettet",
+    "updated": "Opdateret",
+    "importSuccess": "Turnering importeret!",
+    "importError": "Import mislykkedes. Kontroller filformatet.",
+    "exportError": "Eksport mislykkedes.",
+    "deleteConfirm": "Er du sikker på, at du vil slette denne turnering?"
+  },
+  "status": {
+    "completed": "Afsluttet",
+    "inProgress": "I gang",
+    "notStarted": "Ikke startet"
+  },
+  "tournamentTypes": {
+    "singleElimination": "Single Elimination",
+    "doubleElimination": "Double Elimination",
+    "roundRobin": "Round Robin",
+    "swiss": "Swiss System",
+    "freeForAll": "Free For All"
+  },
+  "tournamentTypeDescriptions": {
+    "singleElimination": "Taberen af hver kamp elimineres",
+    "doubleElimination": "Deltagere elimineres efter to nederlag",
+    "roundRobin": "Hver deltager spiller mod alle andre deltagere",
+    "swiss": "Deltagere parres med lignende score",
+    "freeForAll": "Flere deltagere per kamp, vindere går videre"
+  },
+  "create": {
+    "title": "Opret Ny Turnering",
+    "step": {
+      "type": "Type",
+      "options": "Indstillinger",
+      "participants": "Deltagere"
+    },
+    "selectType": "Vælg Turneringstype",
+    "tournamentOptions": "Turneringsindstillinger",
+    "tournamentName": "Turneringsnavn",
+    "tournamentNamePlaceholder": "Indtast turneringsnavn",
+    "addParticipants": "Tilføj Deltagere",
+    "participantName": "Deltagers Navn",
+    "participantNamePlaceholder": "Indtast deltagers navn",
+    "participantsList": "Deltagere ({{count}})",
+    "noParticipants": "Ingen deltagere tilføjet endnu",
+    "createTournament": "Opret Turnering",
+    "errorTitle": "Ret venligst følgende fejl:",
+    "duplicateNameError": "Deltagernavne skal være unikke",
+    "createError": "Kunne ikke oprette turnering"
+  },
+  "options": {
+    "thirdPlaceMatch": "Inkluder 3. pladskamp",
+    "tieBreakers": "Bryd uafgjorte med placeringskampe",
+    "splitStart": "Start med halvdelen i taberbracket",
+    "rankingMethod": "Rangmetode",
+    "rankingWins": "Kampseire",
+    "rankingPoints": "Point Scoret",
+    "numberOfRounds": "Antal Runder",
+    "roundsOnce": "1 (hvert par spiller én gang)",
+    "roundsTwice": "2 (hvert par spiller to gange)",
+    "roundsThrice": "3 (hvert par spiller tre gange)",
+    "pointsPerMatchWin": "Point per Kampsejer",
+    "pointsPerMatchTie": "Point per Kampuafgjort",
+    "pointsPerGameWin": "Point per Spillesejer",
+    "pointsPerBye": "Point per Bye",
+    "participantsPerMatch": "Deltagere per Kamp"
+  },
+  "view": {
+    "backToDashboard": "Tilbage til Dashboard",
+    "currentMatches": "Nuværende Kampe",
+    "noMatches": "Ingen kampe tilgængelige",
+    "standings": "Stillinger",
+    "rank": "Plac.",
+    "participant": "Deltager",
+    "wlt": "S-N-U",
+    "points": "Point",
+    "eliminated": "(Elimineret)",
+    "bye": "(Bye)",
+    "round": "Runde {{number}}",
+    "recordResult": "Registrer Kampresultat",
+    "tournamentNotFound": "Turnering ikke fundet",
+    "loadingTournament": "Indlæser turnering...",
+    "loadError": "Kunne ikke indlæse turnering",
+    "resultError": "Kunne ikke registrere resultat"
+  },
+  "language": {
+    "label": "Sprog",
+    "english": "English",
+    "danish": "Dansk"
+  }
+}
