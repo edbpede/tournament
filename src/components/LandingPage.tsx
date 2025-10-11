@@ -98,10 +98,10 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
                       <button
                         className="absolute text-5xl md:text-6xl lg:text-7xl transition-all duration-300 hover:scale-125 focus:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
                         style={{
-                          left: 'calc(80px + 8vw)',
+                          left: 'calc(66px + 6.6vw)',
                           top: '0',
-                          transform: 'translate(-50%, -50%)',
                           filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2))',
+                          animation: `counter-rotate-${type.key} 60s linear infinite`,
                         }}
                         onClick={() => setActiveIcon(activeIcon === type.key ? null : type.key)}
                         onMouseEnter={() => setActiveIcon(type.key)}
@@ -184,6 +184,28 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
         @keyframes orbit-freeForAll {
           from { transform: rotate(288deg); }
           to { transform: rotate(648deg); }
+        }
+
+        /* Counter-rotation to keep icons upright */
+        @keyframes counter-rotate-singleElimination {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to { transform: translate(-50%, -50%) rotate(-360deg); }
+        }
+        @keyframes counter-rotate-doubleElimination {
+          from { transform: translate(-50%, -50%) rotate(-72deg); }
+          to { transform: translate(-50%, -50%) rotate(-432deg); }
+        }
+        @keyframes counter-rotate-roundRobin {
+          from { transform: translate(-50%, -50%) rotate(-144deg); }
+          to { transform: translate(-50%, -50%) rotate(-504deg); }
+        }
+        @keyframes counter-rotate-swiss {
+          from { transform: translate(-50%, -50%) rotate(-216deg); }
+          to { transform: translate(-50%, -50%) rotate(-576deg); }
+        }
+        @keyframes counter-rotate-freeForAll {
+          from { transform: translate(-50%, -50%) rotate(-288deg); }
+          to { transform: translate(-50%, -50%) rotate(-648deg); }
         }
       `}</style>
     </div>
