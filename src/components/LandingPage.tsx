@@ -6,7 +6,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import {
   Tooltip,
   TooltipContent,
@@ -146,19 +145,19 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
 
       {/* Features Section */}
       <section className="container mx-auto px-4 py-4 md:py-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-3xl mx-auto">
           {features.map((feature, index) => (
-            <Card
+            <div
               key={feature.title}
-              className="p-4 text-center hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 border-muted/50"
+              className="bg-card text-card-foreground rounded-lg border-2 border-border p-3 text-center hover:shadow-lg hover:border-primary/50 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
               style={{ animationDelay: `${index * 100 + 500}ms` }}
             >
-              <div className="text-2xl mb-2">{feature.icon}</div>
-              <h3 className="font-bold text-base mb-1.5">{feature.title}</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <div className="text-xl mb-1.5">{feature.icon}</div>
+              <h3 className="font-semibold text-sm mb-1">{feature.title}</h3>
+              <p className="text-xs text-muted-foreground leading-snug">
                 {feature.description}
               </p>
-            </Card>
+            </div>
           ))}
         </div>
       </section>
