@@ -29,7 +29,7 @@ export default function SingleEliminationBracket({
   const { t } = useTranslation();
 
   // Calculate proper tree-based layout
-  const MATCH_HEIGHT = 120;
+  const MATCH_HEIGHT = 140; // Increased from 120 to accommodate 2 participants with proper spacing
   const MATCH_GAP = 24;
   const ROUND_WIDTH = 240;
   const ROUND_GAP = 48; // Reduced from 64 to minimize trailing whitespace
