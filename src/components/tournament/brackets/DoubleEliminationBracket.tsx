@@ -33,19 +33,19 @@ export default function DoubleEliminationBracket({
 }: Props) {
   const { t } = useTranslation();
 
-  // Calculate proper tree-based layouts for both brackets
-  const MATCH_HEIGHT = 140; // Increased from 120 to accommodate 2 participants with proper spacing
+  // Layout constants - using dynamic height calculation
+  const BASE_MATCH_HEIGHT = 120; // Base height for matches with 2 participants
   const MATCH_GAP = 24;
   const ROUND_WIDTH = 240;
   const ROUND_GAP = 48; // Reduced from 64 to minimize trailing whitespace
 
   const winnersLayout = useMemo(
-    () => calculateBracketLayout(winnersBracket, MATCH_HEIGHT, MATCH_GAP, ROUND_WIDTH),
+    () => calculateBracketLayout(winnersBracket, BASE_MATCH_HEIGHT, MATCH_GAP, ROUND_WIDTH),
     [winnersBracket]
   );
 
   const losersLayout = useMemo(
-    () => calculateBracketLayout(losersBracket, MATCH_HEIGHT, MATCH_GAP, ROUND_WIDTH),
+    () => calculateBracketLayout(losersBracket, BASE_MATCH_HEIGHT, MATCH_GAP, ROUND_WIDTH),
     [losersBracket]
   );
 
@@ -185,11 +185,11 @@ export default function DoubleEliminationBracket({
 
                 if (!parentPos) return null;
 
-                // Calculate line coordinates
+                // Calculate line coordinates using actual match heights for proper centering
                 const x1 = roundIndex * (ROUND_WIDTH + ROUND_GAP) + ROUND_WIDTH;
-                const y1 = matchPos.y + MATCH_HEIGHT / 2;
+                const y1 = matchPos.y + matchPos.height / 2;
                 const x2 = (roundIndex + 1) * (ROUND_WIDTH + ROUND_GAP);
-                const y2 = parentPos.y + MATCH_HEIGHT / 2;
+                const y2 = parentPos.y + parentPos.height / 2;
                 const midX = x1 + ROUND_GAP / 2;
 
                 return (
@@ -257,7 +257,7 @@ export default function DoubleEliminationBracket({
                     style={{
                       top: `${pos.y}px`,
                       width: `${ROUND_WIDTH}px`,
-                      height: `${MATCH_HEIGHT}px`,
+                      minHeight: `${pos.height}px`,
                     }}
                   >
                     {renderMatch(match)}
