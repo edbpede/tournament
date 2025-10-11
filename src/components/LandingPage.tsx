@@ -70,7 +70,7 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
       </header>
 
       {/* Hero Section - Centerpiece Logo with Orbiting Icons */}
-      <section className="relative flex items-center justify-center min-h-[85vh] px-4 py-12">
+      <section className="relative flex items-center justify-center min-h-[60vh] px-4 py-8 md:py-12">
         <div className="relative w-full max-w-4xl mx-auto">
           {/* Central Logo */}
           <div className="flex items-center justify-center">
@@ -132,7 +132,7 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
       </section>
 
       {/* Features Section */}
-      <section className="container mx-auto px-4 py-12 md:py-16">
+      <section className="container mx-auto px-4 py-6 md:py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {features.map((feature, index) => (
             <Card
