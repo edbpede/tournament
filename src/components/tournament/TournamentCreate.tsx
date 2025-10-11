@@ -339,8 +339,10 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
                     <p className="text-xs text-gray-500 mt-1">
                       {(options as any).pointsSystem?.type &&
                        t(`options.tooltips.pointsSystem${
-                         (options as any).pointsSystem.type.charAt(0).toUpperCase() +
-                         (options as any).pointsSystem.type.slice(1).replace(/-/g, '')
+                         (options as any).pointsSystem.type
+                           .split('-')
+                           .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+                           .join('')
                        }`)}
                     </p>
                   </div>
