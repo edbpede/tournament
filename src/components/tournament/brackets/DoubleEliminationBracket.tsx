@@ -1,6 +1,6 @@
 /**
  * Double Elimination Bracket Visualization
- * Displays winners bracket, losers bracket, and grand finals
+ * Displays winners bracket, losers bracket, and grand finals with proper alignment
  */
 
 import { useMemo } from 'react';
@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import type { Match, Participant } from '@/lib/tournaments/types';
-import { organizeBracketByRounds, getRoundLabel } from '@/lib/tournaments/bracketHelpers';
+import { calculateBracketLayout, getRoundLabel } from '@/lib/tournaments/bracketHelpers';
 import { cn } from '@/lib/utils';
 import { Trophy } from 'lucide-react';
 
@@ -33,8 +33,21 @@ export default function DoubleEliminationBracket({
 }: Props) {
   const { t } = useTranslation();
 
-  const winnersRounds = organizeBracketByRounds(winnersBracket);
-  const losersRounds = organizeBracketByRounds(losersBracket);
+  // Calculate proper tree-based layouts for both brackets
+  const MATCH_HEIGHT = 120;
+  const MATCH_GAP = 24;
+  const ROUND_WIDTH = 240;
+  const ROUND_GAP = 64;
+
+  const winnersLayout = useMemo(
+    () => calculateBracketLayout(winnersBracket, MATCH_HEIGHT, MATCH_GAP, ROUND_WIDTH),
+    [winnersBracket]
+  );
+
+  const losersLayout = useMemo(
+    () => calculateBracketLayout(losersBracket, MATCH_HEIGHT, MATCH_GAP, ROUND_WIDTH),
+    [losersBracket]
+  );
 
   // Create participant Map for O(1) lookups instead of O(n) find()
   const participantMap = useMemo(() =>
@@ -125,45 +138,135 @@ export default function DoubleEliminationBracket({
     </Card>
   );
 
-  const renderBracket = (rounds: ReturnType<typeof organizeBracketByRounds>, title: string, badgeVariant: 'default' | 'secondary' = 'default') => (
-    <div className="mb-6 md:mb-8">
-      <div className="mb-4">
-        <Badge variant={badgeVariant} className="text-sm md:text-base font-bold px-3 md:px-4 py-1">
-          {title}
-        </Badge>
-      </div>
+  const renderBracket = (
+    layout: ReturnType<typeof calculateBracketLayout>,
+    title: string,
+    badgeVariant: 'default' | 'secondary' = 'default'
+  ) => {
+    // Calculate total height needed for this bracket
+    let maxY = 0;
+    layout.positions.forEach((pos) => {
+      const bottom = pos.y + pos.height;
+      if (bottom > maxY) maxY = bottom;
+    });
+    const totalHeight = maxY + 40;
 
-      <div className="flex gap-4 md:gap-8 min-w-max pb-4">
-        {rounds.map((round, roundIndex) => (
-          <div key={round.round} className="flex flex-col justify-around min-w-[200px] md:min-w-[240px]">
-            <div className="mb-4 text-center">
-              <Badge variant="outline" className="text-xs md:text-sm font-semibold">
-                {getRoundLabel(round.round, rounds.length)}
-              </Badge>
+    return (
+      <div className="mb-6 md:mb-8">
+        <div className="mb-4">
+          <Badge variant={badgeVariant} className="text-sm md:text-base font-bold px-3 md:px-4 py-1">
+            {title}
+          </Badge>
+        </div>
+
+        <div className="relative min-w-max pb-4" style={{ height: `${totalHeight}px` }}>
+          {/* SVG for connector lines */}
+          <svg
+            className="absolute top-0 left-0 w-full h-full pointer-events-none"
+            style={{ zIndex: 0 }}
+          >
+            {layout.rounds.map((round, roundIndex) => {
+              if (roundIndex >= layout.rounds.length - 1) return null;
+
+              return round.matches.map((match) => {
+                const matchPos = layout.positions.get(match.id);
+                if (!matchPos) return null;
+
+                // Find the parent match (in next round)
+                const nextRound = layout.rounds[roundIndex + 1];
+                const parentIndex = Math.floor(
+                  round.matches.findIndex(m => m.id === match.id) / 2
+                );
+                const parentMatch = nextRound.matches[parentIndex];
+                const parentPos = parentMatch ? layout.positions.get(parentMatch.id) : null;
+
+                if (!parentPos) return null;
+
+                // Calculate line coordinates
+                const x1 = roundIndex * (ROUND_WIDTH + ROUND_GAP) + ROUND_WIDTH;
+                const y1 = matchPos.y + MATCH_HEIGHT / 2;
+                const x2 = (roundIndex + 1) * (ROUND_WIDTH + ROUND_GAP);
+                const y2 = parentPos.y + MATCH_HEIGHT / 2;
+                const midX = x1 + ROUND_GAP / 2;
+
+                return (
+                  <g key={match.id}>
+                    {/* Horizontal line from match */}
+                    <line
+                      x1={x1}
+                      y1={y1}
+                      x2={midX}
+                      y2={y1}
+                      stroke="#d1d5db"
+                      strokeWidth="2"
+                    />
+                    {/* Vertical line */}
+                    <line
+                      x1={midX}
+                      y1={y1}
+                      x2={midX}
+                      y2={y2}
+                      stroke="#d1d5db"
+                      strokeWidth="2"
+                    />
+                    {/* Horizontal line to parent */}
+                    <line
+                      x1={midX}
+                      y1={y2}
+                      x2={x2}
+                      y2={y2}
+                      stroke="#d1d5db"
+                      strokeWidth="2"
+                    />
+                  </g>
+                );
+              });
+            })}
+          </svg>
+
+          {/* Render rounds with positioned matches */}
+          {layout.rounds.map((round, roundIndex) => (
+            <div
+              key={round.round}
+              className="absolute"
+              style={{
+                left: `${roundIndex * (ROUND_WIDTH + ROUND_GAP)}px`,
+                top: 0,
+                width: `${ROUND_WIDTH}px`,
+              }}
+            >
+              {/* Round Header */}
+              <div className="mb-4 text-center sticky top-0 bg-white z-10 pb-2">
+                <Badge variant="outline" className="text-xs md:text-sm font-semibold">
+                  {getRoundLabel(round.round, layout.rounds.length)}
+                </Badge>
+              </div>
+
+              {/* Matches positioned absolutely */}
+              {round.matches.map((match) => {
+                const pos = layout.positions.get(match.id);
+                if (!pos) return null;
+
+                return (
+                  <div
+                    key={match.id}
+                    className="absolute"
+                    style={{
+                      top: `${pos.y}px`,
+                      width: `${ROUND_WIDTH}px`,
+                      height: `${MATCH_HEIGHT}px`,
+                    }}
+                  >
+                    {renderMatch(match)}
+                  </div>
+                );
+              })}
             </div>
-
-            <div className="flex flex-col justify-around gap-3 md:gap-4 flex-1">
-              {round.matches.map((match, matchIndex) => (
-                <div
-                  key={match.id}
-                  className="relative"
-                  style={{
-                    marginTop: roundIndex > 0 ? `${matchIndex * 20}px` : '0',
-                  }}
-                >
-                  {renderMatch(match)}
-
-                  {roundIndex < rounds.length - 1 && (
-                    <div className="absolute top-1/2 -right-4 md:-right-8 w-4 md:w-8 h-0.5 bg-gray-300" />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="w-full h-full">
@@ -175,13 +278,13 @@ export default function DoubleEliminationBracket({
           </div>
 
           {/* Winners Bracket */}
-          {winnersRounds.length > 0 && renderBracket(winnersRounds, "Winners Bracket", "default")}
+          {winnersLayout.rounds.length > 0 && renderBracket(winnersLayout, "Winners Bracket", "default")}
 
           {/* Losers Bracket */}
-          {losersRounds.length > 0 && (
+          {losersLayout.rounds.length > 0 && (
             <>
               <Separator className="my-8" />
-              {renderBracket(losersRounds, "Losers Bracket", "secondary")}
+              {renderBracket(losersLayout, "Losers Bracket", "secondary")}
             </>
           )}
 

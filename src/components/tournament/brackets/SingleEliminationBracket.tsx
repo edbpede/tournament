@@ -1,6 +1,6 @@
 /**
  * Single Elimination Bracket Visualization
- * Displays tournament bracket in a tree structure
+ * Displays tournament bracket in a tree structure with proper alignment
  */
 
 import { useMemo } from 'react';
@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import type { Match, Participant } from '@/lib/tournaments/types';
-import { organizeBracketByRounds, getRoundLabel } from '@/lib/tournaments/bracketHelpers';
+import { calculateBracketLayout, getRoundLabel } from '@/lib/tournaments/bracketHelpers';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -28,8 +28,18 @@ export default function SingleEliminationBracket({
 }: Props) {
   const { t } = useTranslation();
 
-  const rounds = organizeBracketByRounds(bracket);
-  const totalRounds = rounds.length;
+  // Calculate proper tree-based layout
+  const MATCH_HEIGHT = 120;
+  const MATCH_GAP = 24;
+  const ROUND_WIDTH = 240;
+  const ROUND_GAP = 64;
+
+  const layout = useMemo(
+    () => calculateBracketLayout(bracket, MATCH_HEIGHT, MATCH_GAP, ROUND_WIDTH),
+    [bracket]
+  );
+
+  const totalRounds = layout.rounds.length;
 
   // Create participant Map for O(1) lookups instead of O(n) find()
   const participantMap = useMemo(() =>
@@ -57,6 +67,80 @@ export default function SingleEliminationBracket({
     return match.result?.winnerId === participantId;
   };
 
+  // Render a single match card
+  const renderMatchCard = (match: Match) => (
+    <Card
+      className={cn(
+        'p-2 md:p-3 transition-all touch-manipulation w-full',
+        getMatchStatusColor(match)
+      )}
+      onClick={() => {
+        if (match.participantIds.length >= 2 && match.status !== 'completed') {
+          onMatchClick(match);
+        }
+      }}
+    >
+      {/* Match Number */}
+      <div className="text-xs text-gray-500 mb-2">
+        Match #{match.matchNumber}
+      </div>
+
+      {/* Participants */}
+      <div className="space-y-2">
+        {match.participantIds.length === 0 ? (
+          <div className="text-sm text-gray-400 italic">Waiting...</div>
+        ) : match.participantIds.length === 1 ? (
+          <div className="text-sm">
+            <span className="font-medium">{getParticipantName(match.participantIds[0])}</span>
+            <Badge variant="secondary" className="ml-2 text-xs">
+              BYE
+            </Badge>
+          </div>
+        ) : (
+          match.participantIds.map((pid) => {
+            const seed = getParticipantSeed(pid);
+            const winner = isWinner(match, pid);
+
+            return (
+              <div
+                key={pid}
+                className={cn(
+                  'flex items-center justify-between text-sm p-2 rounded',
+                  winner && 'bg-green-100 font-semibold',
+                  !winner && match.status === 'completed' && 'opacity-50'
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  {seed && (
+                    <span className="text-xs text-gray-500 font-mono w-6">
+                      ({seed})
+                    </span>
+                  )}
+                  <span className={cn(winner && 'font-semibold')}>
+                    {getParticipantName(pid)}
+                  </span>
+                </div>
+                {winner && (
+                  <span className="text-green-600 font-bold">✓</span>
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
+    </Card>
+  );
+
+  // Calculate total height needed for the bracket
+  const totalHeight = useMemo(() => {
+    let maxY = 0;
+    layout.positions.forEach((pos) => {
+      const bottom = pos.y + pos.height;
+      if (bottom > maxY) maxY = bottom;
+    });
+    return maxY + 40; // Add padding
+  }, [layout.positions]);
+
   return (
     <div className="w-full h-full">
       <ScrollArea className="w-full h-[calc(100vh-300px)] md:h-[calc(100vh-280px)]">
@@ -66,95 +150,109 @@ export default function SingleEliminationBracket({
             <p className="text-xs text-gray-500">← Scroll horizontally to view all rounds →</p>
           </div>
 
-          {/* Main Bracket */}
-          <div className="flex gap-4 md:gap-8 min-w-max pb-4">
-            {rounds.map((round, roundIndex) => (
-              <div key={round.round} className="flex flex-col justify-around min-w-[200px] md:min-w-[240px]">
+          {/* Main Bracket - Positioned Layout */}
+          <div className="relative min-w-max pb-4" style={{ height: `${totalHeight}px` }}>
+            {/* SVG for connector lines */}
+            <svg
+              className="absolute top-0 left-0 w-full h-full pointer-events-none"
+              style={{ zIndex: 0 }}
+            >
+              {layout.rounds.map((round, roundIndex) => {
+                if (roundIndex >= layout.rounds.length - 1) return null;
+
+                return round.matches.map((match) => {
+                  const matchPos = layout.positions.get(match.id);
+                  if (!matchPos) return null;
+
+                  // Find the parent match (in next round)
+                  const nextRound = layout.rounds[roundIndex + 1];
+                  const parentIndex = Math.floor(
+                    round.matches.findIndex(m => m.id === match.id) / 2
+                  );
+                  const parentMatch = nextRound.matches[parentIndex];
+                  const parentPos = parentMatch ? layout.positions.get(parentMatch.id) : null;
+
+                  if (!parentPos) return null;
+
+                  // Calculate line coordinates
+                  const x1 = roundIndex * (ROUND_WIDTH + ROUND_GAP) + ROUND_WIDTH;
+                  const y1 = matchPos.y + MATCH_HEIGHT / 2;
+                  const x2 = (roundIndex + 1) * (ROUND_WIDTH + ROUND_GAP);
+                  const y2 = parentPos.y + MATCH_HEIGHT / 2;
+                  const midX = x1 + ROUND_GAP / 2;
+
+                  return (
+                    <g key={match.id}>
+                      {/* Horizontal line from match */}
+                      <line
+                        x1={x1}
+                        y1={y1}
+                        x2={midX}
+                        y2={y1}
+                        stroke="#d1d5db"
+                        strokeWidth="2"
+                      />
+                      {/* Vertical line */}
+                      <line
+                        x1={midX}
+                        y1={y1}
+                        x2={midX}
+                        y2={y2}
+                        stroke="#d1d5db"
+                        strokeWidth="2"
+                      />
+                      {/* Horizontal line to parent */}
+                      <line
+                        x1={midX}
+                        y1={y2}
+                        x2={x2}
+                        y2={y2}
+                        stroke="#d1d5db"
+                        strokeWidth="2"
+                      />
+                    </g>
+                  );
+                });
+              })}
+            </svg>
+
+            {/* Render rounds with positioned matches */}
+            {layout.rounds.map((round, roundIndex) => (
+              <div
+                key={round.round}
+                className="absolute"
+                style={{
+                  left: `${roundIndex * (ROUND_WIDTH + ROUND_GAP)}px`,
+                  top: 0,
+                  width: `${ROUND_WIDTH}px`,
+                }}
+              >
                 {/* Round Header */}
-                <div className="mb-4 text-center">
+                <div className="mb-4 text-center sticky top-0 bg-white z-10 pb-2">
                   <Badge variant="outline" className="text-xs md:text-sm font-semibold">
                     {getRoundLabel(round.round, totalRounds)}
                   </Badge>
                 </div>
 
-                {/* Matches in Round */}
-                <div className="flex flex-col justify-around gap-3 md:gap-4 flex-1">
-                  {round.matches.map((match, matchIndex) => (
+                {/* Matches positioned absolutely */}
+                {round.matches.map((match) => {
+                  const pos = layout.positions.get(match.id);
+                  if (!pos) return null;
+
+                  return (
                     <div
                       key={match.id}
-                      className="relative"
+                      className="absolute"
                       style={{
-                        marginTop: roundIndex > 0 ? `${matchIndex * 20}px` : '0',
+                        top: `${pos.y}px`,
+                        width: `${ROUND_WIDTH}px`,
+                        height: `${MATCH_HEIGHT}px`,
                       }}
                     >
-                      <Card
-                        className={cn(
-                          'p-2 md:p-3 transition-all touch-manipulation',
-                          getMatchStatusColor(match)
-                        )}
-                        onClick={() => {
-                          if (match.participantIds.length >= 2 && match.status !== 'completed') {
-                            onMatchClick(match);
-                          }
-                        }}
-                      >
-                        {/* Match Number */}
-                        <div className="text-xs text-gray-500 mb-2">
-                          Match #{match.matchNumber}
-                        </div>
-
-                        {/* Participants */}
-                        <div className="space-y-2">
-                          {match.participantIds.length === 0 ? (
-                            <div className="text-sm text-gray-400 italic">Waiting...</div>
-                          ) : match.participantIds.length === 1 ? (
-                            <div className="text-sm">
-                              <span className="font-medium">{getParticipantName(match.participantIds[0])}</span>
-                              <Badge variant="secondary" className="ml-2 text-xs">
-                                BYE
-                              </Badge>
-                            </div>
-                          ) : (
-                            match.participantIds.map((pid) => {
-                              const seed = getParticipantSeed(pid);
-                              const winner = isWinner(match, pid);
-                              
-                              return (
-                                <div
-                                  key={pid}
-                                  className={cn(
-                                    'flex items-center justify-between text-sm p-2 rounded',
-                                    winner && 'bg-green-100 font-semibold',
-                                    !winner && match.status === 'completed' && 'opacity-50'
-                                  )}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    {seed && (
-                                      <span className="text-xs text-gray-500 font-mono w-6">
-                                        ({seed})
-                                      </span>
-                                    )}
-                                    <span className={cn(winner && 'font-semibold')}>
-                                      {getParticipantName(pid)}
-                                    </span>
-                                  </div>
-                                  {winner && (
-                                    <span className="text-green-600 font-bold">✓</span>
-                                  )}
-                                </div>
-                              );
-                            })
-                          )}
-                        </div>
-                      </Card>
-
-                      {/* Connector Line to Next Round */}
-                      {roundIndex < rounds.length - 1 && (
-                        <div className="absolute top-1/2 -right-4 md:-right-8 w-4 md:w-8 h-0.5 bg-gray-300" />
-                      )}
+                      {renderMatchCard(match)}
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
             ))}
           </div>
