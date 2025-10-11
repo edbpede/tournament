@@ -13,22 +13,22 @@
     "save": "Gem",
     "close": "Luk",
     "confirm": "Bekræft",
-    "wins": "vinder",
+    "wins": "sejre",
     "tournament": "Turnering",
     "tournaments": "Turneringer"
   },
   "dashboard": {
     "title": "TournaGen",
-    "newTournament": "+ Ny Turnering",
+    "newTournament": "+ Ny turnering",
     "noTournaments": "Ingen turneringer",
     "noTournamentsDescription": "Kom i gang ved at oprette en ny turnering.",
     "tournamentCount_one": "{{count}} turnering",
     "tournamentCount_other": "{{count}} turneringer",
     "created": "Oprettet",
     "updated": "Opdateret",
-    "importSuccess": "Turnering importeret!",
-    "importError": "Import mislykkedes. Kontroller filformatet.",
-    "exportError": "Eksport mislykkedes.",
+    "importSuccess": "Turneringen er importeret!",
+    "importError": "Importen mislykkedes. Kontrollér filformatet.",
+    "exportError": "Eksporten mislykkedes.",
     "deleteConfirm": "Er du sikker på, at du vil slette denne turnering?"
   },
   "status": {
@@ -48,90 +48,90 @@
     "doubleElimination": "Deltagere elimineres efter to nederlag",
     "roundRobin": "Hver deltager spiller mod alle andre deltagere",
     "swiss": "Deltagere parres med lignende score",
-    "freeForAll": "Flere deltagere per kamp, vindere går videre"
+    "freeForAll": "Flere deltagere pr. kamp, vindere går videre"
   },
   "create": {
-    "title": "Opret Ny Turnering",
+    "title": "Opret ny turnering",
     "step": {
       "type": "Type",
       "options": "Indstillinger",
       "participants": "Deltagere"
     },
-    "selectType": "Vælg Turneringstype",
+    "selectType": "Vælg turneringstype",
     "tournamentOptions": "Turneringsindstillinger",
     "tournamentName": "Turneringsnavn",
     "tournamentNamePlaceholder": "Indtast turneringsnavn",
-    "addParticipants": "Tilføj Deltagere",
-    "participantName": "Deltagers Navn",
-    "participantNamePlaceholder": "Indtast deltagers navn",
+    "addParticipants": "Tilføj deltagere",
+    "participantName": "Deltagernavn",
+    "participantNamePlaceholder": "Indtast deltagernavn",
     "participantsList": "Deltagere ({{count}})",
     "noParticipants": "Ingen deltagere tilføjet endnu",
-    "createTournament": "Opret Turnering",
+    "createTournament": "Opret turnering",
     "errorTitle": "Ret venligst følgende fejl:",
     "duplicateNameError": "Deltagernavne skal være unikke",
     "createError": "Kunne ikke oprette turnering"
   },
   "options": {
-    "thirdPlaceMatch": "Inkluder 3. pladskamp",
-    "tieBreakers": "Bryd uafgjorte med placeringskampe",
-    "splitStart": "Start med halvdelen i taberbracket",
-    "rankingMethod": "Rangmetode",
-    "rankingWins": "Kampseire",
-    "rankingPoints": "Point Scoret",
-    "numberOfRounds": "Antal Runder",
+    "thirdPlaceMatch": "Inkluder kamp om 3. pladsen",
+    "tieBreakers": "Afgør uafgjorte med placeringskampe",
+    "splitStart": "Start med halvdelen i taberrækken",
+    "rankingMethod": "Rangeringsmetode",
+    "rankingWins": "Kampsejre",
+    "rankingPoints": "Scorede point",
+    "numberOfRounds": "Antal runder",
     "roundsOnce": "1 (hvert par spiller én gang)",
     "roundsTwice": "2 (hvert par spiller to gange)",
     "roundsThrice": "3 (hvert par spiller tre gange)",
-    "pointsPerMatchWin": "Point per Kampsejer",
-    "pointsPerMatchTie": "Point per Kampuafgjort",
-    "pointsPerGameWin": "Point per Spillesejer",
-    "pointsPerBye": "Point per Bye",
-    "participantsPerMatch": "Deltagere per Kamp"
+    "pointsPerMatchWin": "Point pr. kampsejr",
+    "pointsPerMatchTie": "Point pr. uafgjort kamp",
+    "pointsPerGameWin": "Point pr. spilsejr",
+    "pointsPerBye": "Point pr. frirunde",
+    "participantsPerMatch": "Deltagere pr. kamp"
   },
   "view": {
-    "backToDashboard": "Tilbage til Dashboard",
-    "bracket": "Bracket",
+    "backToDashboard": "Tilbage til dashboardet",
+    "bracket": "Turneringstræ",
     "matches": "Kampe",
-    "currentMatches": "Nuværende Kampe",
+    "currentMatches": "Aktuelle kampe",
     "noMatches": "Ingen kampe tilgængelige",
     "standings": "Stillinger",
-    "rank": "Plac.",
+    "rank": "Placering",
     "participant": "Deltager",
     "wlt": "S-N-U",
     "points": "Point",
     "eliminated": "(Elimineret)",
-    "bye": "(Bye)",
+    "bye": "(Frirunde)",
     "round": "Runde {{number}}",
-    "recordResult": "Registrer Kampresultat",
-    "tournamentNotFound": "Turnering ikke fundet",
+    "recordResult": "Registrer kampresultat",
+    "tournamentNotFound": "Turneringen blev ikke fundet",
     "loadingTournament": "Indlæser turnering...",
     "loadError": "Kunne ikke indlæse turnering",
     "resultError": "Kunne ikke registrere resultat"
   },
   "language": {
     "label": "Sprog",
-    "english": "English",
+    "english": "Engelsk",
     "danish": "Dansk"
   },
   "landing": {
     "hero": {
-      "tagline": "En client-side turneringshåndteringsapplikation",
-      "cta": "Åbn TournaGen"
+      "tagline": "Et klientbaseret værktøj til turneringsstyring",
+      "cta": "Gå til TournaGen"
     },
     "tournamentIcons": {
-      "singleElimination": "Single elimination - tab én gang og du er ude",
+      "singleElimination": "Single elimination - tab én gang, og du er ude",
       "doubleElimination": "Double elimination - to chancer for at blive i spillet",
       "roundRobin": "Round robin - alle spiller mod alle",
-      "swiss": "Swiss system - parret efter lignende præstation",
-      "freeForAll": "Free for all - flere deltagere per kamp"
+      "swiss": "Swiss system - parres efter lignende præstation",
+      "freeForAll": "Free for all - flere deltagere pr. kamp"
     },
     "features": {
-      "clientSide": "100% Client-Side",
-      "clientSideDesc": "Kører helt i din browser. Ingen servere, fuldstændig privatliv.",
-      "noAccount": "Ingen Konto Påkrævet",
-      "noAccountDesc": "Start med det samme. Ingen tilmelding, ingen login påkrævet.",
-      "multiLanguage": "Flersproget Support",
-      "multiLanguageDesc": "Tilgængelig på engelsk og dansk med flere på vej."
+      "clientSide": "100 % klientbaseret",
+      "clientSideDesc": "Kører direkte i din browser. Ingen data bliver sendt til en server.",
+      "noAccount": "Ingen konto påkrævet",
+      "noAccountDesc": "Start med det samme. Ingen tilmelding og intet login.",
+      "multiLanguage": "Flersproget support",
+      "multiLanguageDesc": "Tilgængelig på engelsk og dansk - flere sprog er på vej."
     }
   }
 }
