@@ -13,13 +13,6 @@ import type { Match, Standing, MatchResult, TournamentState } from '../../lib/to
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import {
   Table,
   TableBody,
   TableCell,
@@ -30,6 +23,7 @@ import {
 import SingleEliminationBracket from './brackets/SingleEliminationBracket';
 import DoubleEliminationBracket from './brackets/DoubleEliminationBracket';
 import MatchList from './MatchList';
+import MatchResultDialog from './MatchResultDialog';
 
 interface Props {
   tournamentId: string;
@@ -92,9 +86,22 @@ export default function TournamentView({ tournamentId, onBack }: Props) {
   };
 
   const handleMatchClick = (match: Match) => {
-    if (match.participantIds.length === 2 && match.status !== 'completed') {
+    // Allow clicking on any non-completed match
+    if (match.status !== 'completed') {
       setSelectedMatch(match);
     }
+  };
+
+  const isMultiPlayerMatch = (match: Match): boolean => {
+    return match.participantIds.length > 2;
+  };
+
+  const getPointsSystem = () => {
+    if (!tournamentState) return undefined;
+
+    // Extract points system from tournament state options
+    const options = (tournamentState as any).options;
+    return options?.pointsSystem;
   };
 
   const hasBracketView = (type: string): boolean => {
@@ -290,44 +297,14 @@ export default function TournamentView({ tournamentId, onBack }: Props) {
         </Tabs>
 
         {/* Match Result Dialog */}
-        <Dialog open={!!selectedMatch} onOpenChange={() => setSelectedMatch(null)}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>{t('view.recordResult')}</DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-3">
-              {selectedMatch?.participantIds.map((pid) => (
-                <Button
-                  key={pid}
-                  variant="outline"
-                  onClick={() => {
-                    const result: MatchResult = {
-                      winnerId: pid,
-                      loserId: selectedMatch.participantIds.find((id) => id !== pid),
-                    };
-                    handleRecordResult(selectedMatch.id, result);
-                  }}
-                  className="w-full h-auto p-4 justify-start hover:border-green-500 hover:bg-green-50"
-                >
-                  <div className="flex items-center w-full">
-                    <span className="font-medium text-gray-900">{getParticipantName(pid)}</span>
-                    <span className="text-sm text-gray-500 ml-2">{t('common.wins')}</span>
-                  </div>
-                </Button>
-              ))}
-            </div>
-
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setSelectedMatch(null)}
-              >
-                {t('common.cancel')}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <MatchResultDialog
+          match={selectedMatch}
+          participants={tournament.getParticipants()}
+          isMultiPlayer={selectedMatch ? isMultiPlayerMatch(selectedMatch) : false}
+          pointsSystem={getPointsSystem()}
+          onSave={handleRecordResult}
+          onCancel={() => setSelectedMatch(null)}
+        />
       </div>
     </div>
   );

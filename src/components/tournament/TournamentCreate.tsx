@@ -5,9 +5,10 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { TournamentType, TournamentOptions } from '../../lib/tournaments/types';
+import type { TournamentType, TournamentOptions, MatchType, PointsSystemType } from '../../lib/tournaments/types';
 import { createTournament, getDefaultOptions, validateOptions } from '../../lib/tournaments/factory';
 import { saveTournamentState } from '../../lib/storage/localStorage';
+import { POINTS_SYSTEM_PRESETS } from '../../lib/tournaments/pointsSystems';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -234,6 +235,118 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
                 />
               </div>
 
+              {/* Multi-Player Options */}
+              <div className="border-t pt-6">
+                <h3 className="text-md font-medium text-gray-900 mb-4">
+                  {t('options.matchType')}
+                </h3>
+
+                {/* Match Type Selector */}
+                <div className="space-y-3">
+                  <label className="flex items-start">
+                    <input
+                      type="radio"
+                      checked={(options.matchType || 'head-to-head') === 'head-to-head'}
+                      onChange={() => setOptions({
+                        ...options,
+                        matchType: 'head-to-head',
+                        playersPerMatch: 2,
+                        pointsSystem: undefined
+                      } as any)}
+                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                    <div className="ml-3">
+                      <span className="text-sm font-medium text-gray-900">
+                        {t('options.matchTypeHeadToHead')}
+                      </span>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {t('options.tooltips.matchType')}
+                      </p>
+                    </div>
+                  </label>
+
+                  <label className="flex items-start">
+                    <input
+                      type="radio"
+                      checked={options.matchType === 'multi-player'}
+                      onChange={() => setOptions({
+                        ...options,
+                        matchType: 'multi-player',
+                        playersPerMatch: 4
+                      } as any)}
+                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                    <div className="ml-3">
+                      <span className="text-sm font-medium text-gray-900">
+                        {t('options.matchTypeMultiPlayer')}
+                      </span>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {t('options.tooltips.playersPerMatch')}
+                      </p>
+                    </div>
+                  </label>
+                </div>
+
+                {/* Players Per Match (only for multi-player) */}
+                {options.matchType === 'multi-player' && (
+                  <div className="mt-4">
+                    <Label htmlFor="players-per-match">
+                      {t('options.playersPerMatch')}
+                    </Label>
+                    <select
+                      id="players-per-match"
+                      value={(options.playersPerMatch || 4)}
+                      onChange={(e) => setOptions({
+                        ...options,
+                        playersPerMatch: parseInt(e.target.value)
+                      } as any)}
+                      className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                      <option value="6">6</option>
+                      <option value="8">8</option>
+                      <option value="12">12</option>
+                    </select>
+                  </div>
+                )}
+
+                {/* Points System (for Round Robin, Swiss, Free For All with multi-player) */}
+                {options.matchType === 'multi-player' &&
+                 (tournamentType === 'round-robin' || tournamentType === 'swiss' || tournamentType === 'free-for-all') && (
+                  <div className="mt-4">
+                    <Label htmlFor="points-system">
+                      {t('options.pointsSystem')}
+                    </Label>
+                    <select
+                      id="points-system"
+                      value={(options as any).pointsSystem?.type || 'mario-kart'}
+                      onChange={(e) => {
+                        const systemType = e.target.value as PointsSystemType;
+                        setOptions({
+                          ...options,
+                          pointsSystem: { type: systemType }
+                        } as any);
+                      }}
+                      className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="mario-kart">{t('options.pointsSystemMarioKart')}</option>
+                      <option value="f1">{t('options.pointsSystemF1')}</option>
+                      <option value="linear">{t('options.pointsSystemLinear')}</option>
+                      <option value="winner-takes-most">{t('options.pointsSystemWinnerTakesMost')}</option>
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {(options as any).pointsSystem?.type &&
+                       t(`options.tooltips.pointsSystem${
+                         (options as any).pointsSystem.type.charAt(0).toUpperCase() +
+                         (options as any).pointsSystem.type.slice(1).replace(/-/g, '')
+                       }`)}
+                    </p>
+                  </div>
+                )}
+              </div>
+
               {/* Type-specific options */}
               {tournamentType === 'single-elimination' && (
                 <>
@@ -406,28 +519,106 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
                       />
                     </div>
                   </div>
+
+                  {/* Match Points Formula (for multi-player) */}
+                  {options.matchType === 'multi-player' && (
+                    <div className="mt-4">
+                      <Label htmlFor="match-points-formula">
+                        {t('options.matchPointsFormula')}
+                      </Label>
+                      <select
+                        id="match-points-formula"
+                        value={(options as any).matchPointsFormula || 'proportional'}
+                        onChange={(e) =>
+                          setOptions({
+                            ...options,
+                            matchPointsFormula: e.target.value as 'winner-only' | 'proportional',
+                          } as any)
+                        }
+                        className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="proportional">{t('options.matchPointsFormulaProportional')}</option>
+                        <option value="winner-only">{t('options.matchPointsFormulaWinnerOnly')}</option>
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {t('options.tooltips.matchPointsFormula')}
+                      </p>
+                    </div>
+                  )}
                 </>
               )}
 
               {tournamentType === 'free-for-all' && (
-                <div>
-                  <Label htmlFor="participants-per-match">
-                    {t('options.participantsPerMatch')}
-                  </Label>
-                  <Input
-                    id="participants-per-match"
-                    type="number"
-                    min="2"
-                    value={(options as any).participantsPerMatch || 4}
-                    onChange={(e) =>
-                      setOptions({
-                        ...options,
-                        participantsPerMatch: parseInt(e.target.value),
-                      } as any)
-                    }
-                    className="mt-2"
-                  />
-                </div>
+                <>
+                  <div>
+                    <Label htmlFor="participants-per-match">
+                      {t('options.participantsPerMatch')}
+                    </Label>
+                    <Input
+                      id="participants-per-match"
+                      type="number"
+                      min="2"
+                      value={(options as any).participantsPerMatch || options.playersPerMatch || 4}
+                      onChange={(e) =>
+                        setOptions({
+                          ...options,
+                          participantsPerMatch: parseInt(e.target.value),
+                        } as any)
+                      }
+                      className="mt-2"
+                    />
+                  </div>
+
+                  {/* Advancement Rule */}
+                  {options.matchType === 'multi-player' && (
+                    <div className="mt-4">
+                      <Label htmlFor="advancement-rule">
+                        {t('options.advancementRule')}
+                      </Label>
+                      <select
+                        id="advancement-rule"
+                        value={(options as any).advancementRule || 'winner-only'}
+                        onChange={(e) =>
+                          setOptions({
+                            ...options,
+                            advancementRule: e.target.value as 'winner-only' | 'top-n',
+                            advancementCount: e.target.value === 'top-n' ? 2 : undefined,
+                          } as any)
+                        }
+                        className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="winner-only">{t('options.advancementRuleWinnerOnly')}</option>
+                        <option value="top-n">{t('options.advancementRuleTopN')}</option>
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {t('options.tooltips.advancementRuleTopN')}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Advancement Count (only for top-n) */}
+                  {options.matchType === 'multi-player' && (options as any).advancementRule === 'top-n' && (
+                    <div className="mt-4">
+                      <Label htmlFor="advancement-count">
+                        {t('options.advancementCount')}
+                      </Label>
+                      <Input
+                        id="advancement-count"
+                        type="number"
+                        min="2"
+                        max={(options as any).participantsPerMatch || 4}
+                        value={(options as any).advancementCount || 2}
+                        onChange={(e) =>
+                          setOptions({
+                            ...options,
+                            advancementCount: parseInt(e.target.value),
+                          } as any)
+                        }
+                        className="mt-2"
+                      />
+                    </div>
+                  )}
+                </>
               )}
 
               <div className="flex justify-between pt-4">
