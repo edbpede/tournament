@@ -34,7 +34,6 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Medal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface Props {
@@ -59,6 +58,13 @@ interface SortableItemProps {
   isFirst: boolean;
   isLast: boolean;
   t: (key: string, options?: any) => string;
+}
+
+// Helper function to get ordinal suffix (1st, 2nd, 3rd, 4th, etc.)
+function getOrdinalSuffix(n: number): string {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return s[(v - 20) % 10] || s[v] || s[0];
 }
 
 function SortableItem({
@@ -120,19 +126,38 @@ function SortableItem({
         </svg>
       </div>
 
-      {/* Position Medal/Number */}
+      {/* Position Badge */}
       <div className="flex-shrink-0 w-12 flex items-center justify-center">
         {position === 1 && (
-          <Medal className="w-7 h-7 text-yellow-500 fill-yellow-100" aria-label="1st place" />
+          <Badge
+            className="w-8 h-8 rounded-full flex items-center justify-center p-0 text-sm font-bold bg-yellow-500 hover:bg-yellow-500 text-white border-yellow-600"
+            aria-label="1st place"
+          >
+            1
+          </Badge>
         )}
         {position === 2 && (
-          <Medal className="w-7 h-7 text-gray-400 fill-gray-100" aria-label="2nd place" />
+          <Badge
+            className="w-8 h-8 rounded-full flex items-center justify-center p-0 text-sm font-bold bg-gray-400 hover:bg-gray-400 text-white border-gray-500"
+            aria-label="2nd place"
+          >
+            2
+          </Badge>
         )}
         {position === 3 && (
-          <Medal className="w-7 h-7 text-amber-600 fill-amber-100" aria-label="3rd place" />
+          <Badge
+            className="w-8 h-8 rounded-full flex items-center justify-center p-0 text-sm font-bold bg-amber-600 hover:bg-amber-600 text-white border-amber-700"
+            aria-label="3rd place"
+          >
+            3
+          </Badge>
         )}
         {position > 3 && (
-          <Badge variant="outline" className="w-8 h-8 rounded-full flex items-center justify-center p-0 text-sm font-semibold">
+          <Badge
+            variant="outline"
+            className="w-8 h-8 rounded-full flex items-center justify-center p-0 text-sm font-semibold"
+            aria-label={`${position}${getOrdinalSuffix(position)} place`}
+          >
             {position}
           </Badge>
         )}
@@ -237,12 +262,6 @@ export default function MatchResultDialog({
     if (position === 3) return t('view.third');
     if (position === 4) return t('view.fourth');
     return `${position}${getOrdinalSuffix(position)}`;
-  };
-
-  const getOrdinalSuffix = (n: number): string => {
-    const s = ['th', 'st', 'nd', 'rd'];
-    const v = n % 100;
-    return s[(v - 20) % 10] || s[v] || s[0];
   };
 
   const getPointsForPosition = (position: number): number => {
