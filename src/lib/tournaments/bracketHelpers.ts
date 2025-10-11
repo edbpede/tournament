@@ -124,7 +124,9 @@ export function calculateBracketLayout(
 
   // Calculate positions starting from the first round (leftmost)
   // Each match's Y position is determined by its children's positions
-  let currentY = 0;
+  // Add top offset to account for sticky round headers (badge + padding)
+  const TOP_OFFSET = 60; // Space for round header badge and padding
+  let currentY = TOP_OFFSET;
 
   // First round: position matches sequentially
   const firstRound = rounds[0];
@@ -147,11 +149,11 @@ export function calculateBracketLayout(
 
       if (children.length === 0) {
         // No children yet (waiting for matches to complete)
-        // Position at the top for now
+        // Position at the top with offset for round header
         positions.set(match.id, {
           match,
           x: roundIndex,
-          y: 0,
+          y: TOP_OFFSET,
           height: matchHeight,
         });
       } else if (children.length === 1) {
