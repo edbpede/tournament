@@ -7,7 +7,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import type { Match, Participant } from '@/lib/tournaments/types';
 import { calculateBracketLayout, getRoundLabel } from '@/lib/tournaments/bracketHelpers';
@@ -143,15 +143,15 @@ export default function SingleEliminationBracket({
 
   return (
     <div className="w-full h-full">
-      <ScrollArea className="w-full h-[calc(100vh-300px)] md:h-[calc(100vh-280px)]">
-        <div className="p-4 md:p-6">
+      <ScrollArea className="w-full h-[calc(100vh-200px)] md:h-[calc(100vh-180px)]">
+        <div className="p-6 md:p-8 pt-8 md:pt-10">
           {/* Mobile hint */}
           <div className="md:hidden mb-4 text-center">
             <p className="text-xs text-gray-500">← Scroll horizontally to view all rounds →</p>
           </div>
 
           {/* Main Bracket - Positioned Layout */}
-          <div className="relative min-w-max pb-4" style={{ height: `${totalHeight}px` }}>
+          <div className="relative min-w-max pb-8" style={{ height: `${totalHeight}px` }}>
             {/* SVG for connector lines */}
             <svg
               className="absolute top-0 left-0 w-full h-full pointer-events-none"
@@ -319,6 +319,7 @@ export default function SingleEliminationBracket({
             </>
           )}
         </div>
+        <ScrollBar orientation="horizontal" />
       </ScrollArea>
     </div>
   );

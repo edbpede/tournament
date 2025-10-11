@@ -156,14 +156,14 @@ export default function TournamentView({ tournamentId, onBack }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50 p-2 md:p-4">
+      <div className="max-w-[1920px] mx-auto">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-3">
           <Button
             variant="ghost"
             onClick={onBack}
-            className="mb-4 -ml-4"
+            className="mb-2 -ml-2"
           >
             <svg className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -203,8 +203,8 @@ export default function TournamentView({ tournamentId, onBack }: Props) {
 
           {/* Bracket Tab - Only for Single/Double Elimination */}
           {hasBracketView(tournament.getType()) && (
-            <TabsContent value="bracket" className="mt-6">
-              <div className="bg-white shadow rounded-lg">
+            <TabsContent value="bracket" className="mt-3">
+              <div className="bg-white shadow rounded-lg overflow-hidden">
                 {tournament.getType() === 'single-elimination' && tournamentState?.type === 'single-elimination' && (
                   <SingleEliminationBracket
                     bracket={tournamentState.bracket}
@@ -228,7 +228,7 @@ export default function TournamentView({ tournamentId, onBack }: Props) {
           )}
 
           {/* Matches Tab - List View */}
-          <TabsContent value="matches" className="mt-6">
+          <TabsContent value="matches" className="mt-3">
             <div className="bg-white shadow rounded-lg p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('view.currentMatches')}</h2>
 
@@ -243,7 +243,7 @@ export default function TournamentView({ tournamentId, onBack }: Props) {
           </TabsContent>
 
           {/* Standings Tab */}
-          <TabsContent value="standings" className="mt-6">
+          <TabsContent value="standings" className="mt-3">
             <div className="bg-white shadow rounded-lg p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('view.standings')}</h2>
 
