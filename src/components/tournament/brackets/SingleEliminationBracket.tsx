@@ -32,7 +32,7 @@ export default function SingleEliminationBracket({
   const MATCH_HEIGHT = 120;
   const MATCH_GAP = 24;
   const ROUND_WIDTH = 240;
-  const ROUND_GAP = 64;
+  const ROUND_GAP = 48; // Reduced from 64 to minimize trailing whitespace
 
   const layout = useMemo(
     () => calculateBracketLayout(bracket, MATCH_HEIGHT, MATCH_GAP, ROUND_WIDTH),
@@ -131,7 +131,7 @@ export default function SingleEliminationBracket({
     </Card>
   );
 
-  // Calculate total height needed for the bracket
+  // Calculate total height and width needed for the bracket
   const totalHeight = useMemo(() => {
     let maxY = 0;
     layout.positions.forEach((pos) => {
@@ -140,6 +140,11 @@ export default function SingleEliminationBracket({
     });
     return maxY + 40; // Add padding
   }, [layout.positions]);
+
+  // Calculate total width to reduce trailing whitespace
+  const totalWidth = useMemo(() => {
+    return totalRounds * (ROUND_WIDTH + ROUND_GAP) - ROUND_GAP + 32; // Add minimal right padding
+  }, [totalRounds]);
 
   return (
     <div className="w-full h-full">
@@ -151,7 +156,7 @@ export default function SingleEliminationBracket({
           </div>
 
           {/* Main Bracket - Positioned Layout */}
-          <div className="relative min-w-max pb-8" style={{ height: `${totalHeight}px` }}>
+          <div className="relative pb-8" style={{ height: `${totalHeight}px`, width: `${totalWidth}px` }}>
             {/* SVG for connector lines */}
             <svg
               className="absolute top-0 left-0 w-full h-full pointer-events-none"

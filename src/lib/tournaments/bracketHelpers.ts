@@ -84,6 +84,7 @@ export function getRoundLabel(round: number, totalRounds: number): string {
 /**
  * Calculate proper tree-based layout positions for bracket matches
  * This ensures child matches align properly with their parent matches
+ * and prevents any overlap by using proper subtree-based spacing
  */
 export function calculateBracketLayout(
   matches: Match[],
@@ -122,22 +123,33 @@ export function calculateBracketLayout(
     });
   }
 
-  // Calculate positions starting from the first round (leftmost)
-  // Each match's Y position is determined by its children's positions
   // Add top offset to account for sticky round headers (badge + padding)
   const TOP_OFFSET = 60; // Space for round header badge and padding
-  let currentY = TOP_OFFSET;
 
-  // First round: position matches sequentially
+  // Calculate spacing that scales with bracket depth
+  // This ensures proper spacing for all tournament sizes
+  const numRounds = rounds.length;
+  const firstRoundMatches = rounds[0].matches.length;
+
+  // Calculate the minimum vertical spacing needed
+  // For a perfect binary tree, each level doubles the spacing
+  // We use a formula that ensures no overlap: spacing = matchHeight + gap * 2^(numRounds - 1)
+  const baseSpacing = matchHeight + matchGap;
+  const scaleFactor = Math.pow(2, Math.max(0, numRounds - 2));
+  const minSpacing = baseSpacing * scaleFactor;
+
+  // For first round, use calculated minimum spacing
+  let currentY = TOP_OFFSET;
   const firstRound = rounds[0];
-  firstRound.matches.forEach((match, index) => {
+
+  firstRound.matches.forEach((match) => {
     positions.set(match.id, {
       match,
       x: 0,
       y: currentY,
       height: matchHeight,
     });
-    currentY += matchHeight + matchGap;
+    currentY += minSpacing;
   });
 
   // Subsequent rounds: position matches centered between their children

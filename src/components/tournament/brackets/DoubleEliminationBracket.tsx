@@ -37,7 +37,7 @@ export default function DoubleEliminationBracket({
   const MATCH_HEIGHT = 120;
   const MATCH_GAP = 24;
   const ROUND_WIDTH = 240;
-  const ROUND_GAP = 64;
+  const ROUND_GAP = 48; // Reduced from 64 to minimize trailing whitespace
 
   const winnersLayout = useMemo(
     () => calculateBracketLayout(winnersBracket, MATCH_HEIGHT, MATCH_GAP, ROUND_WIDTH),
@@ -151,6 +151,9 @@ export default function DoubleEliminationBracket({
     });
     const totalHeight = maxY + 40;
 
+    // Calculate total width to reduce trailing whitespace
+    const totalWidth = layout.rounds.length * (ROUND_WIDTH + ROUND_GAP) - ROUND_GAP + 32;
+
     return (
       <div className="mb-6 md:mb-8">
         <div className="mb-4">
@@ -159,7 +162,7 @@ export default function DoubleEliminationBracket({
           </Badge>
         </div>
 
-        <div className="relative min-w-max pb-4" style={{ height: `${totalHeight}px` }}>
+        <div className="relative pb-4" style={{ height: `${totalHeight}px`, width: `${totalWidth}px` }}>
           {/* SVG for connector lines */}
           <svg
             className="absolute top-0 left-0 w-full h-full pointer-events-none"
