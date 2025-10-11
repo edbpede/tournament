@@ -8,6 +8,7 @@ import react from '@astrojs/react';
 // https://astro.build/config
 export default defineConfig({
   vite: {
+    // @ts-ignore - Vite 7 plugin type incompatibility with Astro's Vite 6
     plugins: [tailwindcss()],
     build: {
       rollupOptions: {
