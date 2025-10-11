@@ -85,21 +85,22 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
           {/* Orbiting Tournament Type Icons */}
           <TooltipProvider delayDuration={200}>
             <div className="absolute inset-0 pointer-events-none">
-              {tournamentTypes.map((type, index) => (
+              {tournamentTypes.map((type) => (
                 <div
                   key={type.key}
                   className="absolute top-1/2 left-1/2 pointer-events-auto"
                   style={{
-                    animation: 'orbit 60s linear infinite',
-                    animationDelay: `${-index * 12}s`,
+                    animation: `orbit-${type.key} 60s linear infinite`,
                   }}
                 >
                   <Tooltip open={activeIcon === type.key}>
                     <TooltipTrigger asChild>
                       <button
-                        className="absolute -translate-x-1/2 -translate-y-1/2 text-5xl md:text-6xl lg:text-7xl transition-all duration-300 hover:scale-125 focus:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
+                        className="absolute text-5xl md:text-6xl lg:text-7xl transition-all duration-300 hover:scale-125 focus:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
                         style={{
-                          left: `calc(140px + 15vw)`,
+                          left: 'calc(80px + 8vw)',
+                          top: '0',
+                          transform: 'translate(-50%, -50%)',
                           filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2))',
                         }}
                         onClick={() => setActiveIcon(activeIcon === type.key ? null : type.key)}
@@ -164,13 +165,25 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
 
       {/* CSS for Orbit Animation */}
       <style>{`
-        @keyframes orbit {
-          from {
-            transform: rotate(0deg) translateX(calc(140px + 15vw)) rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg) translateX(calc(140px + 15vw)) rotate(-360deg);
-          }
+        @keyframes orbit-singleElimination {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes orbit-doubleElimination {
+          from { transform: rotate(72deg); }
+          to { transform: rotate(432deg); }
+        }
+        @keyframes orbit-roundRobin {
+          from { transform: rotate(144deg); }
+          to { transform: rotate(504deg); }
+        }
+        @keyframes orbit-swiss {
+          from { transform: rotate(216deg); }
+          to { transform: rotate(576deg); }
+        }
+        @keyframes orbit-freeForAll {
+          from { transform: rotate(288deg); }
+          to { transform: rotate(648deg); }
         }
       `}</style>
     </div>
