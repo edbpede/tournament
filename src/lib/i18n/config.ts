@@ -12,6 +12,15 @@ import enTranslations from '../../locales/en/translations.json';
 import daTranslations from '../../locales/da/translations.json';
 
 const LANGUAGE_STORAGE_KEY = 'tournament-app-language';
+const DEFAULT_LANGUAGE = 'da'; // Danish is the default
+
+// Check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+
+// If no language is stored, set Danish as default
+if (isBrowser && !localStorage.getItem(LANGUAGE_STORAGE_KEY)) {
+  localStorage.setItem(LANGUAGE_STORAGE_KEY, DEFAULT_LANGUAGE);
+}
 
 // Custom language detector that uses localStorage
 const languageDetector = new LanguageDetector(null, {
@@ -32,7 +41,7 @@ i18n
         translation: daTranslations,
       },
     },
-    fallbackLng: 'da', // Danish is the default
+    fallbackLng: DEFAULT_LANGUAGE, // Danish is the fallback
     interpolation: {
       escapeValue: false, // React already escapes values
     },
