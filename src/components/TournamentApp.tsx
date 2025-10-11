@@ -155,7 +155,7 @@ export default function TournamentApp() {
               {t('common.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
-              {t('common.delete') || 'Delete'}
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -195,9 +195,9 @@ export default function TournamentView({ tournamentId, onBack }: Props) {
         <Tabs defaultValue={hasBracketView(tournament.getType()) ? "bracket" : "matches"} className="w-full">
           <TabsList className="grid w-full max-w-md" style={{ gridTemplateColumns: hasBracketView(tournament.getType()) ? '1fr 1fr 1fr' : '1fr 1fr' }}>
             {hasBracketView(tournament.getType()) && (
-              <TabsTrigger value="bracket">{t('view.bracket') || 'Bracket'}</TabsTrigger>
+              <TabsTrigger value="bracket">{t('view.bracket')}</TabsTrigger>
             )}
-            <TabsTrigger value="matches">{t('view.matches') || 'Matches'}</TabsTrigger>
+            <TabsTrigger value="matches">{t('view.matches')}</TabsTrigger>
             <TabsTrigger value="standings">{t('view.standings')}</TabsTrigger>
           </TabsList>
 
