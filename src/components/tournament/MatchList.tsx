@@ -3,6 +3,7 @@
  * Displays matches in a list format with optional round grouping
  */
 
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -26,8 +27,14 @@ export default function MatchList({
 }: Props) {
   const { t } = useTranslation();
 
+  // Create participant Map for O(1) lookups instead of O(n) find()
+  const participantMap = useMemo(() =>
+    new Map(participants.map((p) => [p.id, p])),
+    [participants]
+  );
+
   const getParticipantName = (id: string): string => {
-    const participant = participants.find((p) => p.id === id);
+    const participant = participantMap.get(id);
     return participant?.name || 'Unknown';
   };
 

@@ -15,6 +15,53 @@ function isBrowser(): boolean {
   return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
 }
 
+/**
+ * Cache for parsed tournaments to avoid re-parsing on every call
+ */
+let tournamentsCache: Record<string, TournamentState> | null = null;
+let cacheTimestamp: number = 0;
+
+/**
+ * Invalidate the cache
+ */
+function invalidateCache(): void {
+  tournamentsCache = null;
+  cacheTimestamp = 0;
+}
+
+/**
+ * Get all tournaments from localStorage with caching
+ */
+function getAllTournaments(): Record<string, TournamentState> {
+  if (!isBrowser()) return {};
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) {
+      tournamentsCache = {};
+      return {};
+    }
+
+    // Check if we have a valid cache
+    const currentTimestamp = Date.now();
+    if (tournamentsCache !== null && (currentTimestamp - cacheTimestamp) < 1000) {
+      // Cache is valid for 1 second to handle rapid successive calls
+      return tournamentsCache;
+    }
+
+    // Parse and cache
+    const tournaments = JSON.parse(stored) as Record<string, TournamentState>;
+    tournamentsCache = tournaments;
+    cacheTimestamp = currentTimestamp;
+
+    return tournaments;
+  } catch (error) {
+    console.error('Error parsing tournaments from localStorage:', error);
+    invalidateCache();
+    return {};
+  }
+}
+
 export interface TournamentListItem {
   id: string;
   name: string;
@@ -32,10 +79,7 @@ export function listTournaments(): TournamentListItem[] {
   if (!isBrowser()) return [];
 
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return [];
-
-    const tournaments = JSON.parse(stored) as Record<string, TournamentState>;
+    const tournaments = getAllTournaments();
 
     return Object.values(tournaments).map((state) => ({
       id: state.id,
@@ -62,12 +106,13 @@ export function saveTournamentState(state: TournamentState): void {
   }
 
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    const tournaments = stored ? JSON.parse(stored) : {};
-
+    const tournaments = getAllTournaments();
     tournaments[state.id] = state;
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tournaments));
+
+    // Invalidate cache after write
+    invalidateCache();
   } catch (error) {
     console.error('Error saving tournament:', error);
     throw new Error('Failed to save tournament to localStorage');
@@ -81,10 +126,7 @@ export function loadTournamentState(id: string): TournamentState | null {
   if (!isBrowser()) return null;
 
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return null;
-
-    const tournaments = JSON.parse(stored) as Record<string, TournamentState>;
+    const tournaments = getAllTournaments();
     return tournaments[id] || null;
   } catch (error) {
     console.error('Error loading tournament:', error);
@@ -99,16 +141,17 @@ export function deleteTournament(id: string): boolean {
   if (!isBrowser()) return false;
 
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return false;
-
-    const tournaments = JSON.parse(stored) as Record<string, TournamentState>;
+    const tournaments = getAllTournaments();
 
     if (!tournaments[id]) return false;
 
     delete tournaments[id];
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tournaments));
+
+    // Invalidate cache after write
+    invalidateCache();
+
     return true;
   } catch (error) {
     console.error('Error deleting tournament:', error);
@@ -223,6 +266,9 @@ export function importTournamentFromFile(file: File): Promise<string | null> {
 export function clearAllTournaments(): void {
   if (!isBrowser()) return;
   localStorage.removeItem(STORAGE_KEY);
+
+  // Invalidate cache after clearing
+  invalidateCache();
 }
 
 /**
