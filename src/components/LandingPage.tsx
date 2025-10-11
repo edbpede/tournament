@@ -70,68 +70,70 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
       </header>
 
       {/* Hero Section - Centerpiece Logo with Orbiting Icons */}
-      <section className="relative flex items-center justify-center min-h-[60vh] px-4 py-8 md:py-12">
-        <div className="relative w-full max-w-4xl mx-auto">
-          {/* Central Logo */}
-          <div className="flex items-center justify-center">
-            <img
-              src={logoSvg}
-              alt="TournaGen Logo"
-              className="w-64 h-64 md:w-96 md:h-96 lg:w-[28rem] lg:h-[28rem] animate-in fade-in zoom-in duration-1000"
-              style={{ filter: 'drop-shadow(0 10px 30px rgba(0, 0, 0, 0.15))' }}
-            />
-          </div>
-
-          {/* Orbiting Tournament Type Icons */}
-          <TooltipProvider delayDuration={200}>
-            <div className="absolute inset-0 pointer-events-none">
-              {tournamentTypes.map((type) => (
-                <div
-                  key={type.key}
-                  className="absolute top-1/2 left-1/2 pointer-events-auto"
-                  style={{
-                    animation: `orbit-${type.key} 60s linear infinite`,
-                  }}
-                >
-                  <Tooltip open={activeIcon === type.key}>
-                    <TooltipTrigger asChild>
-                      <button
-                        className="absolute text-5xl md:text-6xl lg:text-7xl transition-all duration-300 hover:scale-125 focus:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
-                        style={{
-                          left: 'calc(66px + 6.6vw)',
-                          top: '0',
-                          filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2))',
-                          animation: `counter-rotate-${type.key} 60s linear infinite`,
-                        }}
-                        onClick={() => setActiveIcon(activeIcon === type.key ? null : type.key)}
-                        onMouseEnter={() => setActiveIcon(type.key)}
-                        onMouseLeave={() => setActiveIcon(null)}
-                        aria-label={t(`tournamentTypes.${type.key}`)}
-                      >
-                        {type.icon}
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      className="max-w-xs text-center"
-                      sideOffset={10}
-                    >
-                      <p className="font-semibold mb-1">
-                        {t(`tournamentTypes.${type.key}`)}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {t(`landing.tournamentIcons.${type.key}`)}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-              ))}
+      <section className="relative px-4 py-8 md:py-12">
+        <div className="relative w-full max-w-4xl mx-auto min-h-[60vh] flex items-center justify-center">
+          <div className="relative w-full">
+            {/* Central Logo */}
+            <div className="flex items-center justify-center">
+              <img
+                src={logoSvg}
+                alt="TournaGen Logo"
+                className="w-64 h-64 md:w-96 md:h-96 lg:w-[28rem] lg:h-[28rem] animate-in fade-in zoom-in duration-1000"
+                style={{ filter: 'drop-shadow(0 10px 30px rgba(0, 0, 0, 0.15))' }}
+              />
             </div>
-          </TooltipProvider>
+
+            {/* Orbiting Tournament Type Icons */}
+            <TooltipProvider delayDuration={200}>
+              <div className="absolute inset-0 pointer-events-none">
+                {tournamentTypes.map((type) => (
+                  <div
+                    key={type.key}
+                    className="absolute top-1/2 left-1/2 pointer-events-auto"
+                    style={{
+                      animation: `orbit-${type.key} 60s linear infinite`,
+                    }}
+                  >
+                    <Tooltip open={activeIcon === type.key}>
+                      <TooltipTrigger asChild>
+                        <button
+                          className="absolute text-5xl md:text-6xl lg:text-7xl transition-all duration-300 hover:scale-125 focus:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
+                          style={{
+                            left: 'calc(66px + 6.6vw)',
+                            top: '0',
+                            filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2))',
+                            animation: `counter-rotate-${type.key} 60s linear infinite`,
+                          }}
+                          onClick={() => setActiveIcon(activeIcon === type.key ? null : type.key)}
+                          onMouseEnter={() => setActiveIcon(type.key)}
+                          onMouseLeave={() => setActiveIcon(null)}
+                          aria-label={t(`tournamentTypes.${type.key}`)}
+                        >
+                          {type.icon}
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        className="max-w-xs text-center"
+                        sideOffset={10}
+                      >
+                        <p className="font-semibold mb-1">
+                          {t(`tournamentTypes.${type.key}`)}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {t(`landing.tournamentIcons.${type.key}`)}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                ))}
+              </div>
+            </TooltipProvider>
+          </div>
         </div>
 
         {/* App Name Display */}
-        <div className="flex items-center justify-center mt-8 md:mt-12">
+        <div className="w-full text-center mt-8 md:mt-12">
           <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-primary via-foreground to-primary bg-clip-text text-transparent animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300" style={{ textShadow: '0 4px 20px rgba(0, 0, 0, 0.1)' }}>
             TournaGen
           </h1>
