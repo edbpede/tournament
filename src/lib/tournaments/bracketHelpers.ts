@@ -192,29 +192,23 @@ export function calculateBracketLayout(
   for (let roundIndex = 1; roundIndex < rounds.length; roundIndex++) {
     const round = rounds[roundIndex];
 
+    // Track the maximum Y position used in this round to prevent overlap
+    let maxYInRound = TOP_OFFSET;
+
     round.matches.forEach((match) => {
       const children = childrenMap.get(match.id) || [];
       const actualHeight = calculateMatchHeight(match, baseMatchHeight);
+      let matchY = TOP_OFFSET;
 
       if (children.length === 0) {
-        // No children yet (waiting for matches to complete)
-        // Position at the top with offset for round header
-        positions.set(match.id, {
-          match,
-          x: roundIndex,
-          y: TOP_OFFSET,
-          height: actualHeight,
-        });
+        // No children yet - position below any previously positioned matches in this round
+        matchY = maxYInRound;
       } else if (children.length === 1) {
         // Only one child (odd number of matches or bye)
         const childPos = positions.get(children[0]);
         if (childPos) {
-          positions.set(match.id, {
-            match,
-            x: roundIndex,
-            y: childPos.y,
-            height: actualHeight,
-          });
+          // Align with the single child, but ensure no overlap with previous matches
+          matchY = Math.max(childPos.y, maxYInRound);
         }
       } else {
         // Multiple children: center between first and last child
@@ -230,14 +224,20 @@ export function calculateBracketLayout(
           // Center this match between the top of first child and bottom of last child
           const centerY = (firstChildY + lastChildY + lastChildHeight) / 2 - actualHeight / 2;
 
-          positions.set(match.id, {
-            match,
-            x: roundIndex,
-            y: centerY,
-            height: actualHeight,
-          });
+          // Ensure no overlap with previous matches in this round
+          matchY = Math.max(centerY, maxYInRound);
         }
       }
+
+      positions.set(match.id, {
+        match,
+        x: roundIndex,
+        y: matchY,
+        height: actualHeight,
+      });
+
+      // Update the maximum Y position for this round (bottom of current match + gap)
+      maxYInRound = matchY + actualHeight + matchGap;
     });
   }
 
