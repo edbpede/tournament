@@ -84,7 +84,7 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
             <img
               src={logoSvg}
               alt="TournaGen Logo"
-              className="w-32 h-32 md:w-40 md:h-40 animate-in fade-in duration-1000"
+              className="w-42 h-42 md:w-58 md:h-58 animate-in fade-in duration-1000"
             />
           </div>
 
@@ -148,31 +148,27 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
 
       {/* Features Section */}
       <section className="container mx-auto px-4 py-12 md:py-16">
-        <div className="text-center mb-10">
+        <div className="text-center mb-8">
           <h2 className="text-3xl md:text-4xl font-bold mb-3">
             {t('landing.features.title')}
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {features.map((feature, index) => (
-            <Card
+            <div
               key={feature.titleKey}
-              className="text-center hover:shadow-lg transition-shadow duration-300 animate-in fade-in slide-in-from-bottom-4"
+              className="flex flex-col items-center text-center p-4 rounded-lg border bg-card hover:shadow-md transition-shadow duration-300 animate-in fade-in slide-in-from-bottom-4"
               style={{ animationDelay: `${index * 100 + 500}ms` }}
             >
-              <CardHeader>
-                <div className="text-5xl mb-3">{feature.icon}</div>
-                <CardTitle className="text-xl">
-                  {t(feature.titleKey)}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-base">
-                  {t(feature.descriptionKey)}
-                </CardDescription>
-              </CardContent>
-            </Card>
+              <div className="text-3xl mb-2">{feature.icon}</div>
+              <h3 className="font-semibold text-sm mb-1">
+                {t(feature.titleKey)}
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {t(feature.descriptionKey)}
+              </p>
+            </div>
           ))}
         </div>
       </section>

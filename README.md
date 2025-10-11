@@ -1,6 +1,8 @@
-# Tournament Generator
+# TournaGen
 
-A client-side web application for creating and managing various tournament formats. Built with Astro, React, TypeScript, and Tailwind CSS v4.
+**Formerly Tournament Generator**
+
+A client-side tournament management web application for creating and managing various tournament formats. Built with Astro, React, TypeScript, and Tailwind CSS v4. All data is stored in browser localStorage—no backend required.
 
 ## Features
 
@@ -11,12 +13,11 @@ A client-side web application for creating and managing various tournament forma
   - Swiss System (configurable scoring, auto-pairing)
   - Free For All (multiple participants per match)
 
-- **Internationalization:** Full support for English and Danish (default), with Weblate-ready translation files
-- **Client-Side Only:** No backend required, all data stored in browser localStorage
+- **Client-Side Only:** No backend or account required—all data stored in browser localStorage
 - **Import/Export:** Save and share tournaments as JSON files
-- **Real-Time Updates:** Live standings and match tracking
-- **Modern UI:** Clean, responsive interface with Tailwind CSS v4
-- **Type-Safe:** 100% TypeScript for reliability
+- **Internationalization:** Full support for English and Danish (default), Weblate-ready for community translations
+- **Modern UI:** Clean, responsive interface built with Shadcn UI and Tailwind CSS v4
+- **Type-Safe:** 100% TypeScript with discriminated unions for reliability
 
 ## Quick Start
 
@@ -24,7 +25,7 @@ A client-side web application for creating and managing various tournament forma
 # Install dependencies
 npm install
 
-# Start development server
+# Start development server (http://localhost:4321/)
 npm run dev
 
 # Build for production
@@ -34,20 +35,12 @@ npm run build
 npm run preview
 ```
 
-The application will be available at `http://localhost:4321/`
-
-## Documentation
-
-- **[Tournament Guide](TOURNAMENT_GUIDE.md)** - Complete user guide for all tournament types
-- **[Architecture](ARCHITECTURE.md)** - Technical architecture and design decisions
-- **[I18N Setup](I18N_SETUP.md)** - Internationalization implementation and usage guide
-- **[CLAUDE.md](CLAUDE.md)** - Project guidance for Claude Code
-
 ## Tech Stack
 
 - **Framework:** [Astro](https://astro.build/) with [React](https://react.dev/)
 - **Language:** [TypeScript](https://www.typescriptlang.org/)
 - **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
+- **UI Components:** [Shadcn UI](https://ui.shadcn.com/)
 - **i18n:** [i18next](https://www.i18next.com/) with [react-i18next](https://react.i18next.com/)
 - **Storage:** Browser localStorage
 
@@ -56,58 +49,81 @@ The application will be available at `http://localhost:4321/`
 ```
 src/
 ├── lib/
-│   ├── tournaments/         # Tournament logic
-│   │   ├── types/          # Tournament implementations
-│   │   ├── BaseTournament.ts
-│   │   ├── types.ts        # TypeScript types
-│   │   └── factory.ts      # Tournament factory
+│   ├── tournaments/           # Tournament logic
+│   │   ├── types/            # Tournament implementations
+│   │   │   ├── SingleElimination.ts
+│   │   │   ├── DoubleElimination.ts
+│   │   │   ├── RoundRobin.ts
+│   │   │   ├── Swiss.ts
+│   │   │   └── FreeForAll.ts
+│   │   ├── BaseTournament.ts # Abstract base class
+│   │   ├── types.ts          # TypeScript types & discriminated unions
+│   │   └── factory.ts        # Tournament factory
 │   ├── storage/
-│   │   └── localStorage.ts # Persistence layer
+│   │   └── localStorage.ts   # Persistence layer
 │   └── i18n/
-│       └── config.ts       # i18n configuration
-├── locales/                # Translation files (Weblate-ready)
-│   ├── en/                 # English translations
-│   │   └── translations.json
-│   └── da/                 # Danish translations
-│       └── translations.json
+│       └── config.ts         # i18n configuration
+├── locales/                  # Translation files (Weblate-ready)
+│   ├── en/translations.json
+│   └── da/translations.json
 ├── components/
-│   ├── tournament/         # Tournament UI components
+│   ├── tournament/           # Tournament UI components
+│   │   ├── brackets/        # Bracket visualization
 │   │   ├── TournamentDashboard.tsx
 │   │   ├── TournamentCreate.tsx
 │   │   └── TournamentView.tsx
-│   ├── TournamentApp.tsx   # Main app component
-│   └── LanguageSwitcher.tsx # Language switcher
+│   ├── ui/                  # Shadcn UI components (auto-generated)
+│   ├── TournamentApp.tsx    # Main app component
+│   └── LandingPage.tsx      # Landing page
 └── pages/
-    └── index.astro         # Entry point
+    └── index.astro          # Entry point
 ```
 
-## Usage
+## Architecture
 
-1. **Create a Tournament:** Click "New Tournament" and select a type
-2. **Configure Options:** Set tournament-specific options (3rd place match, scoring rules, etc.)
-3. **Add Participants:** Add participant names (minimum 2)
-4. **Record Matches:** Click matches to record results
-5. **View Standings:** See live rankings updated after each match
-6. **Export/Import:** Save tournaments to JSON or load existing ones
+### Core Design Patterns
+
+- **Factory Pattern:** Type-based tournament creation via `createTournament()`
+- **Discriminated Unions:** Type-safe state management with TypeScript
+- **Abstract Base Class:** `BaseTournament` provides shared functionality
+- **Object-Oriented:** Each tournament type is a class extending `BaseTournament`
+- **SSR-Safe:** All browser API access is guarded for Astro compatibility
+
+### Tournament Lifecycle
+
+1. **Create:** `createTournament(options)` → returns tournament instance
+2. **Start:** Call `.start()` to generate initial matches/bracket
+3. **Update:** Call `.recordMatchResult(matchId, result)` to advance state
+4. **Persist:** Call `.export()` to get serializable state → save to localStorage
+5. **Restore:** Load state from localStorage → `restoreTournament(state)`
+
+Tournament instances are ephemeral—created, mutated, exported, and destroyed. Fresh instances are created from saved state when reloaded.
 
 ## Development
 
 ### Adding a New Tournament Type
 
-1. Create implementation in `src/lib/tournaments/types/NewType.ts` extending `BaseTournament`
-2. Add type to `TournamentType` union in `types.ts`
-3. Add state interface extending `BaseTournamentState`
-4. Update factory in `factory.ts`
-5. (Optional) Create custom UI view component
+See [CLAUDE.md](CLAUDE.md) for detailed instructions. Quick overview:
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed extension guide.
+1. Add type to `TournamentType` union in [src/lib/tournaments/types.ts](src/lib/tournaments/types.ts)
+2. Create `Options` and `State` interfaces extending base types
+3. Create implementation class in `src/lib/tournaments/types/NewType.ts`
+4. Update factory functions in [src/lib/tournaments/factory.ts](src/lib/tournaments/factory.ts)
+5. Add UI components and translations
 
-### Key Design Patterns
+### Path Aliases
 
-- **Factory Pattern:** Create tournaments based on type
-- **Discriminated Unions:** Type-safe state management
-- **Abstract Base Class:** Shared tournament functionality
-- **localStorage Service:** Centralized persistence
+TypeScript path alias `@/*` maps to `src/*`:
+```typescript
+import { Button } from '@/components/ui/button';
+import { createTournament } from '@/lib/tournaments/factory';
+```
+
+### Key Files
+
+- **[CLAUDE.md](CLAUDE.md):** Detailed project documentation for AI-assisted development
+- **[components.json](components.json):** Shadcn UI configuration
+- **[tsconfig.json](tsconfig.json):** TypeScript configuration with path aliases
 
 ## Browser Compatibility
 
@@ -116,8 +132,5 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed extension guide.
 
 ## License
 
-MIT License
+GNU Affero General Public License v3.0
 
----
-
-**Built with Astro + Tailwind CSS v4**
