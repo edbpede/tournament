@@ -2,12 +2,30 @@
  * Match Result Dialog
  * Dialog component for recording match results
  * Supports both 1v1 (winner selection) and multi-player (ranking) modes
+ * Features drag-and-drop reordering for multi-player matches
  */
 
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Match, MatchResult, Participant } from '@/lib/tournaments/types';
 import { getPointsForPlacement } from '@/lib/tournaments/pointsSystems';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import {
   Dialog,
   DialogContent,
@@ -26,6 +44,134 @@ interface Props {
   onCancel: () => void;
 }
 
+interface SortableItemProps {
+  id: string;
+  index: number;
+  participantName: string;
+  position: number;
+  points: number;
+  positionLabel: string;
+  hasPointsSystem: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  isFirst: boolean;
+  isLast: boolean;
+  t: (key: string, options?: any) => string;
+}
+
+function SortableItem({
+  id,
+  index,
+  participantName,
+  position,
+  points,
+  positionLabel,
+  hasPointsSystem,
+  onMoveUp,
+  onMoveDown,
+  isFirst,
+  isLast,
+  t,
+}: SortableItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200 ${
+        isDragging ? 'shadow-lg z-50' : ''
+      }`}
+    >
+      {/* Drag Handle */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="flex-shrink-0 cursor-grab active:cursor-grabbing touch-none"
+        aria-label="Drag to reorder"
+      >
+        <svg
+          className="h-5 w-5 text-gray-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4 8h16M4 16h16"
+          />
+        </svg>
+      </div>
+
+      {/* Position Medal/Number */}
+      <div className="flex-shrink-0 w-12 text-center">
+        {position === 1 && <span className="text-2xl">🥇</span>}
+        {position === 2 && <span className="text-2xl">🥈</span>}
+        {position === 3 && <span className="text-2xl">🥉</span>}
+        {position > 3 && (
+          <span className="text-lg font-semibold text-gray-600">{position}</span>
+        )}
+      </div>
+
+      {/* Participant Name */}
+      <div className="flex-1">
+        <div className="font-medium text-gray-900">{participantName}</div>
+        <div className="text-xs text-gray-500">
+          {positionLabel}
+          {hasPointsSystem && (
+            <span className="ml-2 text-blue-600 font-medium">
+              {t('view.placementPoints', { points })}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Move Buttons */}
+      <div className="flex flex-col gap-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onMoveUp}
+          disabled={isFirst}
+          className="h-6 w-6 p-0"
+          type="button"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+          </svg>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onMoveDown}
+          disabled={isLast}
+          className="h-6 w-6 p-0"
+          type="button"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export default function MatchResultDialog({
   match,
   participants,
@@ -37,6 +183,18 @@ export default function MatchResultDialog({
   const { t } = useTranslation();
   const [rankings, setRankings] = useState<string[]>([]);
 
+  // Configure drag sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Require 8px movement before drag starts (prevents accidental drags)
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   useEffect(() => {
     if (match) {
       // Initialize rankings with participant IDs in order
@@ -45,6 +203,18 @@ export default function MatchResultDialog({
   }, [match]);
 
   if (!match) return null;
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setRankings((items) => {
+        const oldIndex = items.indexOf(active.id as string);
+        const newIndex = items.indexOf(over.id as string);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
 
   const getParticipantName = (id: string) => {
     const participant = participants.find((p) => p.id === id);
@@ -153,74 +323,44 @@ export default function MatchResultDialog({
           </div>
         )}
 
-        {/* Multi-Player Mode - Ranking Interface */}
+        {/* Multi-Player Mode - Ranking Interface with Drag-and-Drop */}
         {isMultiPlayer && (
           <div className="space-y-4">
             <p className="text-sm text-gray-600">{t('view.dragToReorder')}</p>
 
-            <div className="space-y-2">
-              {rankings.map((participantId, index) => {
-                const position = index + 1;
-                const points = getPointsForPosition(position);
-                const positionLabel = getPositionLabel(position);
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext items={rankings} strategy={verticalListSortingStrategy}>
+                <div className="space-y-2">
+                  {rankings.map((participantId, index) => {
+                    const position = index + 1;
+                    const points = getPointsForPosition(position);
+                    const positionLabel = getPositionLabel(position);
 
-                return (
-                  <div
-                    key={participantId}
-                    className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200"
-                  >
-                    {/* Position Medal/Number */}
-                    <div className="flex-shrink-0 w-12 text-center">
-                      {position === 1 && <span className="text-2xl">🥇</span>}
-                      {position === 2 && <span className="text-2xl">🥈</span>}
-                      {position === 3 && <span className="text-2xl">🥉</span>}
-                      {position > 3 && (
-                        <span className="text-lg font-semibold text-gray-600">{position}</span>
-                      )}
-                    </div>
-
-                    {/* Participant Name */}
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900">{getParticipantName(participantId)}</div>
-                      <div className="text-xs text-gray-500">
-                        {positionLabel}
-                        {pointsSystem && (
-                          <span className="ml-2 text-blue-600 font-medium">
-                            {t('view.placementPoints', { points })}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Move Buttons */}
-                    <div className="flex flex-col gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleMoveUp(index)}
-                        disabled={index === 0}
-                        className="h-6 w-6 p-0"
-                      >
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                        </svg>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleMoveDown(index)}
-                        disabled={index === rankings.length - 1}
-                        className="h-6 w-6 p-0"
-                      >
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                    return (
+                      <SortableItem
+                        key={participantId}
+                        id={participantId}
+                        index={index}
+                        participantName={getParticipantName(participantId)}
+                        position={position}
+                        points={points}
+                        positionLabel={positionLabel}
+                        hasPointsSystem={!!pointsSystem}
+                        onMoveUp={() => handleMoveUp(index)}
+                        onMoveDown={() => handleMoveDown(index)}
+                        isFirst={index === 0}
+                        isLast={index === rankings.length - 1}
+                        t={t}
+                      />
+                    );
+                  })}
+                </div>
+              </SortableContext>
+            </DndContext>
           </div>
         )}
 

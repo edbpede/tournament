@@ -49,7 +49,7 @@ export default function SingleEliminationBracket({
 
   const getMatchStatusColor = (match: Match): string => {
     if (match.status === 'completed') return 'border-green-500 bg-green-50';
-    if (match.participantIds.length === 2) return 'border-blue-500 hover:border-blue-600 cursor-pointer';
+    if (match.participantIds.length >= 2) return 'border-blue-500 hover:border-blue-600 cursor-pointer';
     return 'border-gray-300';
   };
 
@@ -93,7 +93,7 @@ export default function SingleEliminationBracket({
                           getMatchStatusColor(match)
                         )}
                         onClick={() => {
-                          if (match.participantIds.length === 2 && match.status !== 'completed') {
+                          if (match.participantIds.length >= 2 && match.status !== 'completed') {
                             onMatchClick(match);
                           }
                         }}
@@ -176,7 +176,7 @@ export default function SingleEliminationBracket({
                     getMatchStatusColor(thirdPlaceMatch)
                   )}
                   onClick={() => {
-                    if (thirdPlaceMatch.participantIds.length === 2 && thirdPlaceMatch.status !== 'completed') {
+                    if (thirdPlaceMatch.participantIds.length >= 2 && thirdPlaceMatch.status !== 'completed') {
                       onMatchClick(thirdPlaceMatch);
                     }
                   }}
