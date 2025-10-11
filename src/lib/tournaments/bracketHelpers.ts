@@ -161,16 +161,20 @@ export function calculateBracketLayout(
   // Add top offset to account for sticky round headers (badge + padding)
   const TOP_OFFSET = 60; // Space for round header badge and padding
 
-  // Calculate spacing that scales with bracket depth
-  // This ensures proper spacing for all tournament sizes
+  // Calculate base spacing for first round matches
+  // Use a simple multiplier that scales reasonably with bracket depth
   const numRounds = rounds.length;
-
-  // Calculate the minimum vertical spacing needed
-  // For a perfect binary tree, each level doubles the spacing
-  // We use a formula that ensures no overlap: spacing = baseMatchHeight + gap * 2^(numRounds - 1)
   const baseSpacing = baseMatchHeight + matchGap;
-  const scaleFactor = Math.pow(2, Math.max(0, numRounds - 2));
-  const minSpacing = baseSpacing * scaleFactor;
+
+  // Use a conservative multiplier that grows more slowly than exponential
+  // This ensures adequate spacing without excessive gaps
+  // For 2 rounds: 1x, 3 rounds: 1.5x, 4 rounds: 2x, 5+ rounds: 2.5x
+  let spacingMultiplier = 1;
+  if (numRounds === 3) spacingMultiplier = 1.5;
+  else if (numRounds === 4) spacingMultiplier = 2;
+  else if (numRounds >= 5) spacingMultiplier = 2.5;
+
+  const firstRoundSpacing = baseSpacing * spacingMultiplier;
 
   // For first round, calculate actual heights and position matches
   let currentY = TOP_OFFSET;
@@ -185,7 +189,7 @@ export function calculateBracketLayout(
       y: currentY,
       height: actualHeight,
     });
-    currentY += minSpacing;
+    currentY += firstRoundSpacing;
   });
 
   // Subsequent rounds: position matches centered between their children
