@@ -29,7 +29,8 @@
     "importSuccess": "Tournament imported successfully!",
     "importError": "Failed to import tournament. Please check the file format.",
     "exportError": "Failed to export tournament.",
-    "deleteConfirm": "Are you sure you want to delete this tournament?"
+    "deleteConfirm": "Are you sure you want to delete this tournament?",
+    "deleteConfirmDescription": "This action cannot be undone. This will permanently delete the tournament and all its data."
   },
   "status": {
     "completed": "Completed",

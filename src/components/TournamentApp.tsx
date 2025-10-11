@@ -147,7 +147,7 @@ export default function TournamentApp() {
           <AlertDialogHeader>
             <AlertDialogTitle>{t('dashboard.deleteConfirm')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('dashboard.deleteConfirmDescription') || 'This action cannot be undone. This will permanently delete the tournament and all its data.'}
+              {t('dashboard.deleteConfirmDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

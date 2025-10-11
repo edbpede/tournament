@@ -29,7 +29,8 @@
     "importSuccess": "Turneringen er importeret!",
     "importError": "Importen mislykkedes. Kontrollér filformatet.",
     "exportError": "Eksporten mislykkedes.",
-    "deleteConfirm": "Er du sikker på, at du vil slette denne turnering?"
+    "deleteConfirm": "Er du sikker på, at du vil slette denne turnering?",
+    "deleteConfirmDescription": "Denne handling kan ikke fortrydes. Turneringen og alle dens data vil blive slettet permanent."
   },
   "status": {
     "completed": "Afsluttet",
