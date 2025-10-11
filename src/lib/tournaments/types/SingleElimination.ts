@@ -59,30 +59,69 @@ export class SingleEliminationTournament extends BaseTournament<
     const participantCount = this.participants.length;
     const rounds = Math.ceil(Math.log2(participantCount));
 
-    // Calculate matches needed in first round
-    const firstRoundMatches = Math.ceil(participantCount / 2);
-
     // If not a power of 2, some participants get byes
-    const byes = Math.pow(2, rounds) - participantCount;
+    const bracketSize = Math.pow(2, rounds);
+    const byes = bracketSize - participantCount;
 
-    // Create all matches for the bracket
-    const totalMatches = Math.pow(2, rounds) - 1;
+    // Calculate actual matches needed in first round
+    // Only participants without byes play in round 1
+    const playingInRound1 = participantCount - byes;
+    const firstRoundMatches = playingInRound1 / 2;
+
+    // Build bracket structure from bottom up (round by round)
     this.bracket = [];
 
-    for (let i = 0; i < totalMatches; i++) {
+    // Round 1: Matches for participants without byes
+    for (let i = 0; i < firstRoundMatches; i++) {
       this.bracket.push({
         id: this.generateId(),
         status: 'pending',
         participantIds: [],
-        matchNumber: i + 1,
+        matchNumber: this.bracket.length + 1,
+        round: 1,
       });
     }
 
-    // Assign participants to first round matches
-    this.seedBracket(firstRoundMatches, byes);
+    // Subsequent rounds: Build up to the final
+    let matchesInPreviousRound = firstRoundMatches;
+    let currentRound = 2;
 
-    // Calculate rounds for each match
-    this.assignRounds();
+    // Add matches for each subsequent round
+    while (matchesInPreviousRound > 0 || currentRound === 2) {
+      // In round 2, we need to account for bye participants
+      let matchesInThisRound: number;
+
+      if (currentRound === 2) {
+        // Round 2 has winners from round 1 + bye participants
+        const winnersFromRound1 = firstRoundMatches;
+        const totalInRound2 = winnersFromRound1 + byes;
+        matchesInThisRound = totalInRound2 / 2;
+      } else {
+        // Subsequent rounds: half the matches from previous round
+        matchesInThisRound = matchesInPreviousRound / 2;
+      }
+
+      for (let i = 0; i < matchesInThisRound; i++) {
+        this.bracket.push({
+          id: this.generateId(),
+          status: 'pending',
+          participantIds: [],
+          matchNumber: this.bracket.length + 1,
+          round: currentRound,
+        });
+      }
+
+      matchesInPreviousRound = matchesInThisRound;
+      currentRound++;
+
+      // Stop when we've created the final match
+      if (matchesInThisRound === 1) {
+        break;
+      }
+    }
+
+    // Assign participants to matches
+    this.seedBracket(firstRoundMatches, byes);
   }
 
   private generateMultiPlayerBracket(playersPerMatch: number): void {
@@ -149,29 +188,25 @@ export class SingleEliminationTournament extends BaseTournament<
       return (a.seed || 0) - (b.seed || 0);
     });
 
-    // Pair participants for first round (standard bracket seeding)
-    let participantIndex = 0;
-
     // Participants with byes advance automatically to round 2
     const byeParticipants = seededParticipants.slice(0, byes);
 
     // Remaining participants play in round 1
     const playingParticipants = seededParticipants.slice(byes);
 
-    // Create first round matches
+    // Create first round matches with standard bracket seeding
+    // Top seed plays bottom seed, 2nd plays 2nd-to-last, etc.
     for (let i = 0; i < firstRoundMatches; i++) {
-      if (i < playingParticipants.length / 2) {
-        // Standard seeding: 1 vs last, 2 vs second-last, etc.
-        const participant1 = playingParticipants[i];
-        const participant2 = playingParticipants[playingParticipants.length - 1 - i];
+      const participant1 = playingParticipants[i];
+      const participant2 = playingParticipants[playingParticipants.length - 1 - i];
 
-        if (participant1 && participant2) {
-          this.bracket[i].participantIds = [participant1.id, participant2.id];
-        }
+      if (participant1 && participant2) {
+        this.bracket[i].participantIds = [participant1.id, participant2.id];
       }
     }
 
     // Add bye participants to second round matches
+    // Second round starts after first round matches
     const secondRoundStart = firstRoundMatches;
     byeParticipants.forEach((p, index) => {
       const matchIndex = secondRoundStart + Math.floor(index / 2);
@@ -181,22 +216,7 @@ export class SingleEliminationTournament extends BaseTournament<
     });
   }
 
-  private assignRounds(): void {
-    const totalMatches = this.bracket.length;
-    let matchesAssigned = 0;
-    let round = 1;
 
-    while (matchesAssigned < totalMatches) {
-      const matchesInRound = Math.pow(2, Math.ceil(Math.log2(totalMatches + 1)) - round);
-
-      for (let i = 0; i < matchesInRound && matchesAssigned < totalMatches; i++) {
-        this.bracket[matchesAssigned].round = round;
-        matchesAssigned++;
-      }
-
-      round++;
-    }
-  }
 
   public getCurrentMatches(): Match[] {
     if (!this.started) return [];
