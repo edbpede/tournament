@@ -100,7 +100,7 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
                         <button
                           className="absolute transition-all duration-300 hover:scale-125 focus:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full p-2"
                           style={{
-                            left: 'calc(66px + 6.6vw)',
+                            left: 'var(--orbit-radius)',
                             top: '0',
                             filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2))',
                             animation: `counter-rotate-${type.key} 60s linear infinite`,
@@ -181,6 +181,23 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
 
       {/* CSS for Orbit Animation */}
       <style>{`
+        /* Responsive orbit radius using CSS custom properties */
+        :root {
+          --orbit-radius: 170px; /* Mobile: smaller radius with breathing room */
+        }
+
+        @media (min-width: 768px) {
+          :root {
+            --orbit-radius: 230px; /* Tablet: medium radius with breathing room */
+          }
+        }
+
+        @media (min-width: 1024px) {
+          :root {
+            --orbit-radius: 270px; /* Desktop: larger radius with breathing room */
+          }
+        }
+
         @keyframes orbit-singleElimination {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
