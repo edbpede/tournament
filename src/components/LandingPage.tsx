@@ -137,21 +137,25 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
           <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-primary via-foreground to-primary bg-clip-text text-transparent animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300" style={{ textShadow: '0 4px 20px rgba(0, 0, 0, 0.1)' }}>
             TournaGen
           </h1>
+          {/* Tagline */}
+          <p className="text-lg md:text-xl text-muted-foreground mt-3 md:mt-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-400">
+            {t('landing.hero.tagline')}
+          </p>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="container mx-auto px-4 py-6 md:py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+      <section className="container mx-auto px-4 py-4 md:py-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
           {features.map((feature, index) => (
             <Card
               key={feature.title}
-              className="p-6 text-center hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 border-muted/50"
-              style={{ animationDelay: `${index * 100 + 400}ms` }}
+              className="p-4 text-center hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 border-muted/50"
+              style={{ animationDelay: `${index * 100 + 500}ms` }}
             >
-              <div className="text-4xl mb-3">{feature.icon}</div>
-              <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <div className="text-2xl mb-2">{feature.icon}</div>
+              <h3 className="font-bold text-base mb-1.5">{feature.title}</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 {feature.description}
               </p>
             </Card>

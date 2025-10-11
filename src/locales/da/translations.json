@@ -115,6 +115,7 @@
   },
   "landing": {
     "hero": {
+      "tagline": "En client-side turneringshåndteringsapplikation",
       "cta": "Åbn TournaGen"
     },
     "tournamentIcons": {

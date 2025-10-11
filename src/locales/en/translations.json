@@ -115,6 +115,7 @@
   },
   "landing": {
     "hero": {
+      "tagline": "A client-side tournament management application",
       "cta": "Enter TournaGen"
     },
     "tournamentIcons": {
