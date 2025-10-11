@@ -112,5 +112,39 @@
     "label": "Sprog",
     "english": "English",
     "danish": "Dansk"
+  },
+  "landing": {
+    "hero": {
+      "title": "Turneringsstyring",
+      "subtitle": "Administrer turneringer med lethed. Understøtter 5 turneringsformater - alt i din browser.",
+      "cta": "Kom i Gang"
+    },
+    "types": {
+      "title": "5 Turneringsformater",
+      "subtitle": "Vælg det perfekte format til din konkurrence"
+    },
+    "features": {
+      "title": "Hvorfor Vælge Turneringsstyring?",
+      "clientSide": {
+        "title": "Kun Client-Side",
+        "description": "Alle data gemmes lokalt i din browser. Ingen servere, ingen uploads, fuldstændig privatliv."
+      },
+      "noAccount": {
+        "title": "Ingen Konto Nødvendig",
+        "description": "Begynd at organisere turneringer med det samme. Ingen tilmelding, ingen login, ingen besvær."
+      },
+      "multilingual": {
+        "title": "Flersproget Support",
+        "description": "Tilgængelig på engelsk og dansk. Skift sprog når som helst med et klik."
+      }
+    },
+    "cta": {
+      "title": "Klar til at Komme i Gang?",
+      "description": "Opret din første turnering på få sekunder. Ingen installation krævet.",
+      "button": "Start Turneringsstyring"
+    },
+    "footer": {
+      "text": "© 2025 Turneringsstyring. Alle rettigheder forbeholdes."
+    }
   }
 }

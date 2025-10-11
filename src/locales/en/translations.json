@@ -112,5 +112,39 @@
     "label": "Language",
     "english": "English",
     "danish": "Dansk"
+  },
+  "landing": {
+    "hero": {
+      "title": "Tournament Manager",
+      "subtitle": "Manage tournaments with ease. Supports 5 tournament formats - all in your browser.",
+      "cta": "Get Started"
+    },
+    "types": {
+      "title": "5 Tournament Formats",
+      "subtitle": "Choose the perfect format for your competition"
+    },
+    "features": {
+      "title": "Why Choose Tournament Manager?",
+      "clientSide": {
+        "title": "Client-Side Only",
+        "description": "All data is stored locally in your browser. No servers, no uploads, complete privacy."
+      },
+      "noAccount": {
+        "title": "No Account Needed",
+        "description": "Start organizing tournaments immediately. No sign-up, no login, no hassle."
+      },
+      "multilingual": {
+        "title": "Multilingual Support",
+        "description": "Available in English and Danish. Switch languages anytime with one click."
+      }
+    },
+    "cta": {
+      "title": "Ready to Get Started?",
+      "description": "Create your first tournament in seconds. No installation required.",
+      "button": "Launch Tournament Manager"
+    },
+    "footer": {
+      "text": "© 2025 Tournament Manager. All rights reserved."
+    }
   }
 }

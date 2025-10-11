@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TournamentListItem } from '../lib/storage/localStorage';
 import { listTournaments, deleteTournament } from '../lib/storage/localStorage';
+import LandingPage from './LandingPage';
 import TournamentDashboard from './tournament/TournamentDashboard';
 import TournamentCreate from './tournament/TournamentCreate';
 import TournamentView from './tournament/TournamentView';
@@ -23,13 +24,14 @@ import {
 } from '@/components/ui/alert-dialog';
 
 type View =
+  | { type: 'landing' }
   | { type: 'dashboard' }
   | { type: 'create' }
   | { type: 'tournament'; id: string };
 
 export default function TournamentApp() {
   const { t } = useTranslation();
-  const [view, setView] = useState<View>({ type: 'dashboard' });
+  const [view, setView] = useState<View>({ type: 'landing' });
   const [tournaments, setTournaments] = useState<TournamentListItem[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [tournamentToDelete, setTournamentToDelete] = useState<string | null>(null);
@@ -80,7 +82,16 @@ export default function TournamentApp() {
     setView({ type: 'dashboard' });
   };
 
+  const handleEnterApp = () => {
+    refreshTournaments();
+    setView({ type: 'dashboard' });
+  };
+
   // Render based on current view
+  if (view.type === 'landing') {
+    return <LandingPage onEnter={handleEnterApp} />;
+  }
+
   if (view.type === 'create') {
     return (
       <TournamentCreate
