@@ -83,15 +83,20 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
           <div className="relative">
             <img
               src={logoSvg}
-              alt="Tournament Manager Logo"
+              alt="TournaGen Logo"
               className="w-32 h-32 md:w-40 md:h-40 animate-in fade-in duration-1000"
             />
           </div>
 
           <div className="space-y-4 max-w-3xl">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight animate-in slide-in-from-bottom-4 duration-1000">
-              {t('landing.hero.title')}
-            </h1>
+            <div className="space-y-2">
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tight animate-in slide-in-from-bottom-4 duration-1000">
+                {t('landing.hero.title')}
+              </h1>
+              <p className="text-lg md:text-xl text-muted-foreground/80 font-medium animate-in slide-in-from-bottom-4 duration-1000 delay-75">
+                {t('landing.hero.tagline')}
+              </p>
+            </div>
             <p className="text-xl md:text-2xl text-muted-foreground animate-in slide-in-from-bottom-4 duration-1000 delay-100">
               {t('landing.hero.subtitle')}
             </p>

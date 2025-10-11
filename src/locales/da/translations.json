@@ -18,7 +18,7 @@
     "tournaments": "Turneringer"
   },
   "dashboard": {
-    "title": "Turneringsstyring",
+    "title": "TournaGen",
     "newTournament": "+ Ny Turnering",
     "noTournaments": "Ingen turneringer",
     "noTournamentsDescription": "Kom i gang ved at oprette en ny turnering.",
@@ -115,7 +115,8 @@
   },
   "landing": {
     "hero": {
-      "title": "Turneringsstyring",
+      "title": "TournaGen",
+      "tagline": "Turneringsgenerator",
       "subtitle": "Administrer turneringer med lethed. Understøtter 5 turneringsformater - alt i din browser.",
       "cta": "Kom i Gang"
     },
@@ -124,7 +125,7 @@
       "subtitle": "Vælg det perfekte format til din konkurrence"
     },
     "features": {
-      "title": "Hvorfor Vælge Turneringsstyring?",
+      "title": "Hvorfor Vælge TournaGen?",
       "clientSide": {
         "title": "Kun Client-Side",
         "description": "Alle data gemmes lokalt i din browser. Ingen servere, ingen uploads, fuldstændig privatliv."
@@ -141,10 +142,10 @@
     "cta": {
       "title": "Klar til at Komme i Gang?",
       "description": "Opret din første turnering på få sekunder. Ingen installation krævet.",
-      "button": "Start Turneringsstyring"
+      "button": "Start TournaGen"
     },
     "footer": {
-      "text": "© 2025 Turneringsstyring. Alle rettigheder forbeholdes."
+      "text": "© 2025 TournaGen. Alle rettigheder forbeholdes."
     }
   }
 }

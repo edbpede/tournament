@@ -18,7 +18,7 @@
     "tournaments": "Tournaments"
   },
   "dashboard": {
-    "title": "Tournament Manager",
+    "title": "TournaGen",
     "newTournament": "+ New Tournament",
     "noTournaments": "No tournaments",
     "noTournamentsDescription": "Get started by creating a new tournament.",
@@ -115,7 +115,8 @@
   },
   "landing": {
     "hero": {
-      "title": "Tournament Manager",
+      "title": "TournaGen",
+      "tagline": "Tournament Generator",
       "subtitle": "Manage tournaments with ease. Supports 5 tournament formats - all in your browser.",
       "cta": "Get Started"
     },
@@ -124,7 +125,7 @@
       "subtitle": "Choose the perfect format for your competition"
     },
     "features": {
-      "title": "Why Choose Tournament Manager?",
+      "title": "Why Choose TournaGen?",
       "clientSide": {
         "title": "Client-Side Only",
         "description": "All data is stored locally in your browser. No servers, no uploads, complete privacy."
@@ -141,10 +142,10 @@
     "cta": {
       "title": "Ready to Get Started?",
       "description": "Create your first tournament in seconds. No installation required.",
-      "button": "Launch Tournament Manager"
+      "button": "Launch TournaGen"
     },
     "footer": {
-      "text": "© 2025 Tournament Manager. All rights reserved."
+      "text": "© 2025 TournaGen. All rights reserved."
     }
   }
 }
