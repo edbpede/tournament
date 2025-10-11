@@ -11,6 +11,22 @@ import { restoreTournament } from '../../lib/tournaments/factory';
 import type { BaseTournament } from '../../lib/tournaments/BaseTournament';
 import type { Match, Standing, MatchResult, TournamentState } from '../../lib/tournaments/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import SingleEliminationBracket from './brackets/SingleEliminationBracket';
 import DoubleEliminationBracket from './brackets/DoubleEliminationBracket';
 import MatchList from './MatchList';
@@ -105,12 +121,12 @@ export default function TournamentView({ tournamentId, onBack }: Props) {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600">{error || t('view.tournamentNotFound')}</p>
-          <button
+          <Button
             onClick={onBack}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="mt-4"
           >
             {t('view.backToDashboard')}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -137,15 +153,16 @@ export default function TournamentView({ tournamentId, onBack }: Props) {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <button
+          <Button
+            variant="ghost"
             onClick={onBack}
-            className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
+            className="mb-4 -ml-4"
           >
             <svg className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             {t('view.backToDashboard')}
-          </button>
+          </Button>
 
           <div className="flex items-center justify-between">
             <div>
@@ -223,91 +240,94 @@ export default function TournamentView({ tournamentId, onBack }: Props) {
             <div className="bg-white shadow rounded-lg p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('view.standings')}</h2>
 
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead>
-                    <tr>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-20">
                         {t('view.rank')}
-                      </th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      </TableHead>
+                      <TableHead>
                         {t('view.participant')}
-                      </th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      </TableHead>
+                      <TableHead className="w-32">
                         {t('view.wlt')}
-                      </th>
+                      </TableHead>
                       {standings.some((s) => s.points !== undefined) && (
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <TableHead className="w-24 text-right">
                           {t('view.points')}
-                        </th>
+                        </TableHead>
                       )}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {standings.map((standing) => (
-                      <tr key={standing.participantId}>
-                        <td className="px-3 py-2 text-sm font-medium text-gray-900">
+                      <TableRow key={standing.participantId}>
+                        <TableCell className="font-medium">
                           {standing.rank || '-'}
-                        </td>
-                        <td className="px-3 py-2 text-sm text-gray-900">
+                        </TableCell>
+                        <TableCell>
                           {standing.participantName}
                           {standing.isEliminated && (
                             <span className="ml-2 text-xs text-red-600">{t('view.eliminated')}</span>
                           )}
-                        </td>
-                        <td className="px-3 py-2 text-sm text-gray-600">
+                        </TableCell>
+                        <TableCell>
                           {standing.wins}-{standing.losses}-{standing.ties}
-                        </td>
+                        </TableCell>
                         {standings.some((s) => s.points !== undefined) && (
-                          <td className="px-3 py-2 text-sm text-gray-600">
+                          <TableCell className="text-right">
                             {standing.points || 0}
-                          </td>
+                          </TableCell>
                         )}
-                      </tr>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </div>
           </TabsContent>
         </Tabs>
 
-        {/* Match Result Modal */}
-        {selectedMatch && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('view.recordResult')}</h3>
+        {/* Match Result Dialog */}
+        <Dialog open={!!selectedMatch} onOpenChange={() => setSelectedMatch(null)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{t('view.recordResult')}</DialogTitle>
+            </DialogHeader>
 
-              <div className="space-y-4">
-                {selectedMatch.participantIds.map((pid) => (
-                  <button
-                    key={pid}
-                    onClick={() => {
-                      const result: MatchResult = {
-                        winnerId: pid,
-                        loserId: selectedMatch.participantIds.find((id) => id !== pid),
-                      };
-                      handleRecordResult(selectedMatch.id, result);
-                    }}
-                    className="w-full p-4 text-left border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-colors"
-                  >
+            <div className="space-y-3">
+              {selectedMatch?.participantIds.map((pid) => (
+                <Button
+                  key={pid}
+                  variant="outline"
+                  onClick={() => {
+                    const result: MatchResult = {
+                      winnerId: pid,
+                      loserId: selectedMatch.participantIds.find((id) => id !== pid),
+                    };
+                    handleRecordResult(selectedMatch.id, result);
+                  }}
+                  className="w-full h-auto p-4 justify-start hover:border-green-500 hover:bg-green-50"
+                >
+                  <div className="flex items-center w-full">
                     <span className="font-medium text-gray-900">{getParticipantName(pid)}</span>
                     <span className="text-sm text-gray-500 ml-2">{t('common.wins')}</span>
-                  </button>
-                ))}
-              </div>
-
-              <div className="mt-4 flex justify-end gap-2">
-                <button
-                  onClick={() => setSelectedMatch(null)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  {t('common.cancel')}
-                </button>
-              </div>
+                  </div>
+                </Button>
+              ))}
             </div>
-          </div>
-        )}
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setSelectedMatch(null)}
+              >
+                {t('common.cancel')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

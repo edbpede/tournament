@@ -8,6 +8,9 @@ import { useTranslation } from 'react-i18next';
 import type { TournamentType, TournamentOptions } from '../../lib/tournaments/types';
 import { createTournament, getDefaultOptions, validateOptions } from '../../lib/tournaments/factory';
 import { saveTournamentState } from '../../lib/storage/localStorage';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface Props {
   onTournamentCreated: (id: string) => void;
@@ -122,15 +125,16 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold text-gray-900">{t('create.title')}</h1>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onCancel}
-              className="text-gray-400 hover:text-gray-600"
               title={t('common.cancel')}
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-            </button>
+            </Button>
           </div>
 
           {/* Progress Steps */}
@@ -195,14 +199,17 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
               <h2 className="text-lg font-medium text-gray-900 mb-4">{t('create.selectType')}</h2>
               <div className="grid grid-cols-1 gap-4">
                 {tournamentTypes.map((type) => (
-                  <button
+                  <Button
                     key={type.type}
+                    variant="outline"
                     onClick={() => handleTypeSelect(type.type)}
-                    className="text-left p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                    className="h-auto text-left p-4 justify-start hover:border-blue-500 hover:bg-blue-50"
                   >
-                    <h3 className="font-medium text-gray-900">{type.label}</h3>
-                    <p className="text-sm text-gray-600 mt-1">{type.description}</p>
-                  </button>
+                    <div>
+                      <h3 className="font-medium text-gray-900">{type.label}</h3>
+                      <p className="text-sm text-gray-600 mt-1 font-normal">{type.description}</p>
+                    </div>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -214,15 +221,16 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
 
               {/* Tournament Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Label htmlFor="tournament-name">
                   {t('create.tournamentName')}
-                </label>
-                <input
+                </Label>
+                <Input
+                  id="tournament-name"
                   type="text"
                   value={options.name || ''}
                   onChange={(e) => setOptions({ ...options, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('create.tournamentNamePlaceholder')}
+                  className="mt-2"
                 />
               </div>
 
@@ -326,10 +334,11 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
                 <>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <Label htmlFor="points-match-win">
                         {t('options.pointsPerMatchWin')}
-                      </label>
-                      <input
+                      </Label>
+                      <Input
+                        id="points-match-win"
                         type="number"
                         min="0"
                         value={(options as any).pointsPerMatchWin || 3}
@@ -339,15 +348,16 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
                             pointsPerMatchWin: parseInt(e.target.value),
                           } as any)
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="mt-2"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <Label htmlFor="points-match-tie">
                         {t('options.pointsPerMatchTie')}
-                      </label>
-                      <input
+                      </Label>
+                      <Input
+                        id="points-match-tie"
                         type="number"
                         min="0"
                         value={(options as any).pointsPerMatchTie || 1}
@@ -357,15 +367,16 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
                             pointsPerMatchTie: parseInt(e.target.value),
                           } as any)
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="mt-2"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <Label htmlFor="points-game-win">
                         {t('options.pointsPerGameWin')}
-                      </label>
-                      <input
+                      </Label>
+                      <Input
+                        id="points-game-win"
                         type="number"
                         min="0"
                         value={(options as any).pointsPerGameWin || 1}
@@ -375,22 +386,23 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
                             pointsPerGameWin: parseInt(e.target.value),
                           } as any)
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="mt-2"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <Label htmlFor="points-bye">
                         {t('options.pointsPerBye')}
-                      </label>
-                      <input
+                      </Label>
+                      <Input
+                        id="points-bye"
                         type="number"
                         min="0"
                         value={(options as any).pointsPerBye || 3}
                         onChange={(e) =>
                           setOptions({ ...options, pointsPerBye: parseInt(e.target.value) } as any)
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="mt-2"
                       />
                     </div>
                   </div>
@@ -399,10 +411,11 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
 
               {tournamentType === 'free-for-all' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Label htmlFor="participants-per-match">
                     {t('options.participantsPerMatch')}
-                  </label>
-                  <input
+                  </Label>
+                  <Input
+                    id="participants-per-match"
                     type="number"
                     min="2"
                     value={(options as any).participantsPerMatch || 4}
@@ -412,24 +425,23 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
                         participantsPerMatch: parseInt(e.target.value),
                       } as any)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="mt-2"
                   />
                 </div>
               )}
 
               <div className="flex justify-between pt-4">
-                <button
+                <Button
+                  variant="outline"
                   onClick={() => setStep('type')}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
                   {t('common.back')}
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={handleOptionsNext}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
                   {t('common.next')}
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -439,11 +451,12 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
               <h2 className="text-lg font-medium text-gray-900">{t('create.addParticipants')}</h2>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Label htmlFor="participant-name">
                   {t('create.participantName')}
-                </label>
-                <div className="flex gap-2">
-                  <input
+                </Label>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    id="participant-name"
                     type="text"
                     value={participantInput}
                     onChange={(e) => {
@@ -459,15 +472,14 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
                         handleAddParticipant();
                       }
                     }}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder={t('create.participantNamePlaceholder')}
+                    className="flex-1"
                   />
-                  <button
+                  <Button
                     onClick={handleAddParticipant}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                   >
                     {t('common.add')}
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -483,11 +495,13 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
                         className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
                       >
                         <span className="text-sm text-gray-900">{name}</span>
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleRemoveParticipant(index)}
-                          className="text-red-600 hover:text-red-800"
+                          className="h-6 w-6 text-red-600 hover:text-red-800 hover:bg-red-50"
                         >
-                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -495,7 +509,7 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
                               d="M6 18L18 6M6 6l12 12"
                             />
                           </svg>
-                        </button>
+                        </Button>
                       </li>
                     ))}
                   </ul>
@@ -505,19 +519,19 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
               </div>
 
               <div className="flex justify-between pt-4">
-                <button
+                <Button
+                  variant="outline"
                   onClick={() => setStep('options')}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
                   {t('common.back')}
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={handleCreate}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                   disabled={(options.participantNames?.length || 0) < 2}
+                  className="bg-green-600 hover:bg-green-700"
                 >
                   {t('create.createTournament')}
-                </button>
+                </Button>
               </div>
             </div>
           )}

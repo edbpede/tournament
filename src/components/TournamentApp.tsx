@@ -11,6 +11,16 @@ import TournamentDashboard from './tournament/TournamentDashboard';
 import TournamentCreate from './tournament/TournamentCreate';
 import TournamentView from './tournament/TournamentView';
 import '../lib/i18n/config'; // Initialize i18n
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 type View =
   | { type: 'dashboard' }
@@ -21,6 +31,8 @@ export default function TournamentApp() {
   const { t } = useTranslation();
   const [view, setView] = useState<View>({ type: 'dashboard' });
   const [tournaments, setTournaments] = useState<TournamentListItem[]>([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [tournamentToDelete, setTournamentToDelete] = useState<string | null>(null);
 
   // Load tournaments from localStorage
   const refreshTournaments = () => {
@@ -46,10 +58,17 @@ export default function TournamentApp() {
   };
 
   const handleDeleteTournament = (id: string) => {
-    if (confirm(t('dashboard.deleteConfirm'))) {
-      deleteTournament(id);
+    setTournamentToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (tournamentToDelete) {
+      deleteTournament(tournamentToDelete);
       refreshTournaments();
     }
+    setDeleteDialogOpen(false);
+    setTournamentToDelete(null);
   };
 
   const handleBackToDashboard = () => {
@@ -82,12 +101,33 @@ export default function TournamentApp() {
 
   // Dashboard view
   return (
-    <TournamentDashboard
-      tournaments={tournaments}
-      onCreateNew={handleCreateNew}
-      onViewTournament={handleViewTournament}
-      onDeleteTournament={handleDeleteTournament}
-      onRefresh={refreshTournaments}
-    />
+    <>
+      <TournamentDashboard
+        tournaments={tournaments}
+        onCreateNew={handleCreateNew}
+        onViewTournament={handleViewTournament}
+        onDeleteTournament={handleDeleteTournament}
+        onRefresh={refreshTournaments}
+      />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('dashboard.deleteConfirm')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('dashboard.deleteConfirmDescription') || 'This action cannot be undone. This will permanently delete the tournament and all its data.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteDialogOpen(false)}>
+              {t('common.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              {t('common.delete') || 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

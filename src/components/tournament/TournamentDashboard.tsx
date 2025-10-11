@@ -12,6 +12,7 @@ import {
   getStorageInfo,
 } from '../../lib/storage/localStorage';
 import LanguageSwitcher from '../LanguageSwitcher';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   tournaments: TournamentListItem[];
@@ -114,23 +115,22 @@ export default function TournamentDashboard({
           <div className="mt-4 md:mt-0 flex flex-wrap gap-2 items-center">
             <LanguageSwitcher />
 
-            <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-              {importing ? t('common.importing') : t('common.import')}
-              <input
-                type="file"
-                accept=".json"
-                onChange={handleImport}
-                disabled={importing}
-                className="hidden"
-              />
-            </label>
+            <Button variant="outline" asChild>
+              <label className="cursor-pointer">
+                {importing ? t('common.importing') : t('common.import')}
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleImport}
+                  disabled={importing}
+                  className="hidden"
+                />
+              </label>
+            </Button>
 
-            <button
-              onClick={onCreateNew}
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
+            <Button onClick={onCreateNew}>
               {t('dashboard.newTournament')}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -153,12 +153,9 @@ export default function TournamentDashboard({
             <h3 className="mt-2 text-sm font-medium text-gray-900">{t('dashboard.noTournaments')}</h3>
             <p className="mt-1 text-sm text-gray-500">{t('dashboard.noTournamentsDescription')}</p>
             <div className="mt-6">
-              <button
-                onClick={onCreateNew}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-              >
+              <Button onClick={onCreateNew}>
                 {t('dashboard.newTournament')}
-              </button>
+              </Button>
             </div>
           </div>
         ) : (
@@ -199,9 +196,10 @@ export default function TournamentDashboard({
                       </div>
 
                       <div className="flex gap-2 ml-4">
-                        <button
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => handleExport(tournament.id)}
-                          className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                           title="Export"
                         >
                           <svg
@@ -217,12 +215,14 @@ export default function TournamentDashboard({
                               d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
                             />
                           </svg>
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => onDeleteTournament(tournament.id)}
-                          className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                           title="Delete"
+                          className="text-red-700 hover:bg-red-50 hover:text-red-700"
                         >
                           <svg
                             className="h-4 w-4"
@@ -237,7 +237,7 @@ export default function TournamentDashboard({
                               d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                             />
                           </svg>
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
