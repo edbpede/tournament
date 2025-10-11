@@ -4,6 +4,7 @@
  */
 
 import { useTranslation } from 'react-i18next';
+import { LANGUAGE_STORAGE_KEY } from '../lib/i18n/config';
 
 export default function LanguageSwitcher() {
   const { i18n, t } = useTranslation();
@@ -15,6 +16,8 @@ export default function LanguageSwitcher() {
 
   const handleLanguageChange = (languageCode: string) => {
     i18n.changeLanguage(languageCode);
+    // Manually save to localStorage since we removed LanguageDetector
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, languageCode);
   };
 
   return (
