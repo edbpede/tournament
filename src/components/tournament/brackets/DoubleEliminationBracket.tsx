@@ -37,7 +37,6 @@ export default function DoubleEliminationBracket({
   const BASE_MATCH_HEIGHT = 120; // Base height for matches with 2 participants
   const MATCH_GAP = 24;
   const ROUND_WIDTH = 240;
-  const ROUND_GAP = 48; // Reduced from 64 to minimize trailing whitespace
 
   const winnersLayout = useMemo(
     () => calculateBracketLayout(winnersBracket, BASE_MATCH_HEIGHT, MATCH_GAP, ROUND_WIDTH),
@@ -48,6 +47,16 @@ export default function DoubleEliminationBracket({
     () => calculateBracketLayout(losersBracket, BASE_MATCH_HEIGHT, MATCH_GAP, ROUND_WIDTH),
     [losersBracket]
   );
+
+  // Dynamic round gap based on the larger bracket size
+  // Smaller tournaments get tighter spacing to prevent excessive whitespace
+  const totalRounds = Math.max(winnersLayout.rounds.length, losersLayout.rounds.length);
+  const ROUND_GAP = useMemo(() => {
+    if (totalRounds <= 2) return 32; // Very small tournaments
+    if (totalRounds === 3) return 40; // Small tournaments
+    if (totalRounds === 4) return 48; // Medium tournaments
+    return 56; // Large tournaments
+  }, [totalRounds]);
 
   // Create participant Map for O(1) lookups instead of O(n) find()
   const participantMap = useMemo(() =>
@@ -151,8 +160,8 @@ export default function DoubleEliminationBracket({
     });
     const totalHeight = maxY + 40;
 
-    // Calculate total width to reduce trailing whitespace
-    const totalWidth = layout.rounds.length * (ROUND_WIDTH + ROUND_GAP) - ROUND_GAP + 32;
+    // Calculate total width based on rounds and dynamic gap
+    const totalWidth = layout.rounds.length * (ROUND_WIDTH + ROUND_GAP) - ROUND_GAP;
 
     return (
       <div className="mb-6 md:mb-8">
@@ -162,7 +171,9 @@ export default function DoubleEliminationBracket({
           </Badge>
         </div>
 
-        <div className="relative pb-4" style={{ height: `${totalHeight}px`, width: `${totalWidth}px` }}>
+        {/* Centered bracket container */}
+        <div className="flex justify-center">
+          <div className="relative pb-4" style={{ height: `${totalHeight}px`, width: `${totalWidth}px` }}>
           {/* SVG for connector lines */}
           <svg
             className="absolute top-0 left-0 w-full h-full pointer-events-none"
@@ -266,6 +277,7 @@ export default function DoubleEliminationBracket({
               })}
             </div>
           ))}
+          </div>
         </div>
       </div>
     );
@@ -274,12 +286,12 @@ export default function DoubleEliminationBracket({
   return (
     <div className="w-full h-full">
       <ScrollArea className="w-full h-[calc(100vh-200px)] md:h-[calc(100vh-180px)]">
-        <div className="p-6 md:p-8 pt-8 md:pt-10">
-          {/* Mobile hint */}
-          <div className="md:hidden mb-4 text-center">
-            <p className="text-xs text-gray-500">← Scroll horizontally to view all rounds →</p>
-          </div>
+        {/* Mobile hint */}
+        <div className="md:hidden pt-4 px-6 text-center">
+          <p className="text-xs text-gray-500">← Scroll horizontally to view all rounds →</p>
+        </div>
 
+        <div className="p-6 md:p-8 pt-8 md:pt-10">
           {/* Winners Bracket */}
           {winnersLayout.rounds.length > 0 && renderBracket(winnersLayout, "Winners Bracket", "default")}
 
@@ -295,7 +307,7 @@ export default function DoubleEliminationBracket({
           {grandFinal && (
             <>
               <Separator className="my-8" />
-              <div className="max-w-md mx-auto">
+              <div className="max-w-md mx-auto pb-8">
                 <div className="mb-4 text-center">
                   <Badge className="text-base font-bold px-4 py-1 bg-yellow-500 hover:bg-yellow-600 gap-2">
                     <Trophy className="w-5 h-5" />

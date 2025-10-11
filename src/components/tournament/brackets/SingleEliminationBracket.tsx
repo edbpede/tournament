@@ -32,7 +32,6 @@ export default function SingleEliminationBracket({
   const BASE_MATCH_HEIGHT = 120; // Base height for matches with 2 participants
   const MATCH_GAP = 24;
   const ROUND_WIDTH = 240;
-  const ROUND_GAP = 48; // Reduced from 64 to minimize trailing whitespace
 
   const layout = useMemo(
     () => calculateBracketLayout(bracket, BASE_MATCH_HEIGHT, MATCH_GAP, ROUND_WIDTH),
@@ -40,6 +39,15 @@ export default function SingleEliminationBracket({
   );
 
   const totalRounds = layout.rounds.length;
+
+  // Dynamic round gap based on tournament size
+  // Smaller tournaments get tighter spacing to prevent excessive whitespace
+  const ROUND_GAP = useMemo(() => {
+    if (totalRounds <= 2) return 32; // Very small tournaments
+    if (totalRounds === 3) return 40; // Small tournaments
+    if (totalRounds === 4) return 48; // Medium tournaments
+    return 56; // Large tournaments
+  }, [totalRounds]);
 
   // Create participant Map for O(1) lookups instead of O(n) find()
   const participantMap = useMemo(() =>
@@ -131,7 +139,7 @@ export default function SingleEliminationBracket({
     </Card>
   );
 
-  // Calculate total height and width needed for the bracket
+  // Calculate total height needed for the bracket
   const totalHeight = useMemo(() => {
     let maxY = 0;
     layout.positions.forEach((pos) => {
@@ -141,20 +149,21 @@ export default function SingleEliminationBracket({
     return maxY + 40; // Add padding
   }, [layout.positions]);
 
-  // Calculate total width to reduce trailing whitespace
+  // Calculate total width based on rounds and dynamic gap
   const totalWidth = useMemo(() => {
-    return totalRounds * (ROUND_WIDTH + ROUND_GAP) - ROUND_GAP + 32; // Add minimal right padding
-  }, [totalRounds]);
+    return totalRounds * (ROUND_WIDTH + ROUND_GAP) - ROUND_GAP;
+  }, [totalRounds, ROUND_GAP]);
 
   return (
     <div className="w-full h-full">
       <ScrollArea className="w-full h-[calc(100vh-200px)] md:h-[calc(100vh-180px)]">
-        <div className="p-6 md:p-8 pt-8 md:pt-10">
-          {/* Mobile hint */}
-          <div className="md:hidden mb-4 text-center">
-            <p className="text-xs text-gray-500">← Scroll horizontally to view all rounds →</p>
-          </div>
+        {/* Mobile hint */}
+        <div className="md:hidden pt-4 px-6 text-center">
+          <p className="text-xs text-gray-500">← Scroll horizontally to view all rounds →</p>
+        </div>
 
+        {/* Centered bracket container */}
+        <div className="flex justify-center items-start min-h-full p-6 md:p-8 pt-8 md:pt-10">
           {/* Main Bracket - Positioned Layout */}
           <div className="relative pb-8" style={{ height: `${totalHeight}px`, width: `${totalWidth}px` }}>
             {/* SVG for connector lines */}
@@ -261,69 +270,69 @@ export default function SingleEliminationBracket({
               </div>
             ))}
           </div>
+        </div>
 
-          {/* Third Place Match */}
-          {thirdPlaceMatch && (
-            <>
-              <Separator className="my-8" />
-              <div className="max-w-md mx-auto">
-                <div className="mb-4 text-center">
-                  <Badge variant="outline" className="text-sm font-semibold">
-                    Third Place Match
-                  </Badge>
+        {/* Third Place Match */}
+        {thirdPlaceMatch && (
+          <div className="px-6 md:px-8 pb-8">
+            <Separator className="my-8" />
+            <div className="max-w-md mx-auto">
+              <div className="mb-4 text-center">
+                <Badge variant="outline" className="text-sm font-semibold">
+                  Third Place Match
+                </Badge>
+              </div>
+
+              <Card
+                className={cn(
+                  'p-3 transition-all',
+                  getMatchStatusColor(thirdPlaceMatch)
+                )}
+                onClick={() => {
+                  if (thirdPlaceMatch.participantIds.length >= 2 && thirdPlaceMatch.status !== 'completed') {
+                    onMatchClick(thirdPlaceMatch);
+                  }
+                }}
+              >
+                <div className="text-xs text-gray-500 mb-2">
+                  Match #{thirdPlaceMatch.matchNumber}
                 </div>
 
-                <Card
-                  className={cn(
-                    'p-3 transition-all',
-                    getMatchStatusColor(thirdPlaceMatch)
-                  )}
-                  onClick={() => {
-                    if (thirdPlaceMatch.participantIds.length >= 2 && thirdPlaceMatch.status !== 'completed') {
-                      onMatchClick(thirdPlaceMatch);
-                    }
-                  }}
-                >
-                  <div className="text-xs text-gray-500 mb-2">
-                    Match #{thirdPlaceMatch.matchNumber}
-                  </div>
+                <div className="space-y-2">
+                  {thirdPlaceMatch.participantIds.map((pid) => {
+                    const seed = getParticipantSeed(pid);
+                    const winner = isWinner(thirdPlaceMatch, pid);
 
-                  <div className="space-y-2">
-                    {thirdPlaceMatch.participantIds.map((pid) => {
-                      const seed = getParticipantSeed(pid);
-                      const winner = isWinner(thirdPlaceMatch, pid);
-                      
-                      return (
-                        <div
-                          key={pid}
-                          className={cn(
-                            'flex items-center justify-between text-sm p-2 rounded',
-                            winner && 'bg-green-100 font-semibold',
-                            !winner && thirdPlaceMatch.status === 'completed' && 'opacity-50'
-                          )}
-                        >
-                          <div className="flex items-center gap-2">
-                            {seed && (
-                              <span className="text-xs text-gray-500 font-mono w-6">
-                                ({seed})
-                              </span>
-                            )}
-                            <span className={cn(winner && 'font-semibold')}>
-                              {getParticipantName(pid)}
+                    return (
+                      <div
+                        key={pid}
+                        className={cn(
+                          'flex items-center justify-between text-sm p-2 rounded',
+                          winner && 'bg-green-100 font-semibold',
+                          !winner && thirdPlaceMatch.status === 'completed' && 'opacity-50'
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          {seed && (
+                            <span className="text-xs text-gray-500 font-mono w-6">
+                              ({seed})
                             </span>
-                          </div>
-                          {winner && (
-                            <span className="text-green-600 font-bold">✓</span>
                           )}
+                          <span className={cn(winner && 'font-semibold')}>
+                            {getParticipantName(pid)}
+                          </span>
                         </div>
-                      );
-                    })}
-                  </div>
-                </Card>
-              </div>
-            </>
-          )}
-        </div>
+                        {winner && (
+                          <span className="text-green-600 font-bold">✓</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            </div>
+          </div>
+        )}
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
     </div>
