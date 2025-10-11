@@ -12,6 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Trophy, Swords, RefreshCw, Crown, Target, HardDrive, Unlock, Globe } from 'lucide-react';
 import logoSvg from '../assets/logo.svg?url';
 import '../lib/i18n/config';
 
@@ -29,28 +30,28 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
   };
 
   const tournamentTypes = [
-    { key: 'singleElimination', icon: '🏆', angle: 0 },
-    { key: 'doubleElimination', icon: '⚔️', angle: 72 },
-    { key: 'roundRobin', icon: '🔄', angle: 144 },
-    { key: 'swiss', icon: '♟️', angle: 216 },
-    { key: 'freeForAll', icon: '🎯', angle: 288 },
+    { key: 'singleElimination', Icon: Trophy, angle: 0 },
+    { key: 'doubleElimination', Icon: Swords, angle: 72 },
+    { key: 'roundRobin', Icon: RefreshCw, angle: 144 },
+    { key: 'swiss', Icon: Crown, angle: 216 },
+    { key: 'freeForAll', Icon: Target, angle: 288 },
   ];
 
   const features = [
     {
       title: t('landing.features.clientSide'),
       description: t('landing.features.clientSideDesc'),
-      icon: '💾',
+      Icon: HardDrive,
     },
     {
       title: t('landing.features.noAccount'),
       description: t('landing.features.noAccountDesc'),
-      icon: '🔓',
+      Icon: Unlock,
     },
     {
       title: t('landing.features.multiLanguage'),
       description: t('landing.features.multiLanguageDesc'),
-      icon: '🌐',
+      Icon: Globe,
     },
   ];
 
@@ -64,7 +65,8 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
           onClick={toggleLanguage}
           className="gap-2 backdrop-blur-sm bg-background/80"
         >
-          🌐 {i18n.language === 'en' ? 'Dansk' : 'English'}
+          <Globe className="w-4 h-4" />
+          {i18n.language === 'en' ? 'Dansk' : 'English'}
         </Button>
       </header>
 
@@ -96,7 +98,7 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
                     <Tooltip open={activeIcon === type.key}>
                       <TooltipTrigger asChild>
                         <button
-                          className="absolute text-5xl md:text-6xl lg:text-7xl transition-all duration-300 hover:scale-125 focus:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
+                          className="absolute transition-all duration-300 hover:scale-125 focus:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full p-2"
                           style={{
                             left: 'calc(66px + 6.6vw)',
                             top: '0',
@@ -108,7 +110,7 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
                           onMouseLeave={() => setActiveIcon(null)}
                           aria-label={t(`tournamentTypes.${type.key}`)}
                         >
-                          {type.icon}
+                          <type.Icon className="w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 text-foreground" strokeWidth={1.5} />
                         </button>
                       </TooltipTrigger>
                       <TooltipContent
@@ -152,7 +154,9 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
               className="bg-card text-card-foreground rounded-lg border-2 border-border p-3 text-center hover:shadow-lg hover:border-primary/50 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
               style={{ animationDelay: `${index * 100 + 500}ms` }}
             >
-              <div className="text-xl mb-1.5">{feature.icon}</div>
+              <div className="flex justify-center mb-1.5">
+                <feature.Icon className="w-8 h-8 text-primary" strokeWidth={1.5} />
+              </div>
               <h3 className="font-semibold text-sm mb-1">{feature.title}</h3>
               <p className="text-xs text-muted-foreground leading-snug">
                 {feature.description}

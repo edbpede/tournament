@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import type { Match, Participant } from '@/lib/tournaments/types';
 import { organizeBracketByRounds, getRoundLabel } from '@/lib/tournaments/bracketHelpers';
 import { cn } from '@/lib/utils';
+import { Trophy } from 'lucide-react';
 
 interface Props {
   winnersBracket: Match[];
@@ -190,8 +191,9 @@ export default function DoubleEliminationBracket({
               <Separator className="my-8" />
               <div className="max-w-md mx-auto">
                 <div className="mb-4 text-center">
-                  <Badge className="text-base font-bold px-4 py-1 bg-yellow-500 hover:bg-yellow-600">
-                    🏆 Grand Finals
+                  <Badge className="text-base font-bold px-4 py-1 bg-yellow-500 hover:bg-yellow-600 gap-2">
+                    <Trophy className="w-5 h-5" />
+                    Grand Finals
                   </Badge>
                 </div>
 

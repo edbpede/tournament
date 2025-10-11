@@ -34,6 +34,8 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Medal } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface Props {
   match: Match | null;
@@ -119,12 +121,20 @@ function SortableItem({
       </div>
 
       {/* Position Medal/Number */}
-      <div className="flex-shrink-0 w-12 text-center">
-        {position === 1 && <span className="text-2xl">🥇</span>}
-        {position === 2 && <span className="text-2xl">🥈</span>}
-        {position === 3 && <span className="text-2xl">🥉</span>}
+      <div className="flex-shrink-0 w-12 flex items-center justify-center">
+        {position === 1 && (
+          <Medal className="w-7 h-7 text-yellow-500 fill-yellow-100" aria-label="1st place" />
+        )}
+        {position === 2 && (
+          <Medal className="w-7 h-7 text-gray-400 fill-gray-100" aria-label="2nd place" />
+        )}
+        {position === 3 && (
+          <Medal className="w-7 h-7 text-amber-600 fill-amber-100" aria-label="3rd place" />
+        )}
         {position > 3 && (
-          <span className="text-lg font-semibold text-gray-600">{position}</span>
+          <Badge variant="outline" className="w-8 h-8 rounded-full flex items-center justify-center p-0 text-sm font-semibold">
+            {position}
+          </Badge>
         )}
       </div>
 
