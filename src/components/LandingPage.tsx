@@ -129,6 +129,13 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
             </div>
           </TooltipProvider>
         </div>
+
+        {/* App Name Display */}
+        <div className="flex items-center justify-center mt-8 md:mt-12">
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-primary via-foreground to-primary bg-clip-text text-transparent animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300" style={{ textShadow: '0 4px 20px rgba(0, 0, 0, 0.1)' }}>
+            TournaGen
+          </h1>
+        </div>
       </section>
 
       {/* Features Section */}
