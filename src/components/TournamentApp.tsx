@@ -28,11 +28,20 @@ type View =
   | { type: 'tournament'; id: string };
 
 export default function TournamentApp() {
-  const { t } = useTranslation();
+  const { t, ready } = useTranslation();
   const [view, setView] = useState<View>({ type: 'dashboard' });
   const [tournaments, setTournaments] = useState<TournamentListItem[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [tournamentToDelete, setTournamentToDelete] = useState<string | null>(null);
+
+  // Wait for i18n to be ready before rendering
+  if (!ready) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg text-gray-600">Loading...</div>
+      </div>
+    );
+  }
 
   // Load tournaments from localStorage
   const refreshTournaments = () => {

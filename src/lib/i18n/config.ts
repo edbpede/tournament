@@ -17,10 +17,21 @@ const DEFAULT_LANGUAGE = 'da'; // Danish is the default
 // Check if we're in a browser environment
 const isBrowser = typeof window !== 'undefined' && typeof localStorage !== 'undefined';
 
-// If no language is stored, set Danish as default
-if (isBrowser && !localStorage.getItem(LANGUAGE_STORAGE_KEY)) {
+// Get the current language synchronously from localStorage, or use default
+const getInitialLanguage = (): string => {
+  if (!isBrowser) return DEFAULT_LANGUAGE;
+
+  const storedLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+  if (storedLanguage) {
+    return storedLanguage;
+  }
+
+  // No language stored, set Danish as default
   localStorage.setItem(LANGUAGE_STORAGE_KEY, DEFAULT_LANGUAGE);
-}
+  return DEFAULT_LANGUAGE;
+};
+
+const initialLanguage = getInitialLanguage();
 
 // Custom language detector that uses localStorage
 const languageDetector = new LanguageDetector(null, {
@@ -41,6 +52,7 @@ i18n
         translation: daTranslations,
       },
     },
+    lng: initialLanguage, // Set initial language synchronously
     fallbackLng: DEFAULT_LANGUAGE, // Danish is the fallback
     interpolation: {
       escapeValue: false, // React already escapes values
