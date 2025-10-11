@@ -169,13 +169,13 @@ export function calculateBracketLayout(
   const baseSpacing = baseMatchHeight + matchGap;
 
   // Dynamic multiplier: decreases as tournament size increases
-  // Formula: 1 + (3 / numRounds)
-  // - 2 rounds (4 players):   2.5x spacing
-  // - 3 rounds (8 players):   2.0x spacing
-  // - 4 rounds (16 players):  1.75x spacing
-  // - 5 rounds (32 players):  1.6x spacing
-  // - 6 rounds (64 players):  1.5x spacing
-  const spacingMultiplier = 1 + (3 / numRounds);
+  // Formula: 1 + (2 / numRounds)
+  // - 2 rounds (4 players):   2.0x spacing (288px)
+  // - 3 rounds (8 players):   1.67x spacing (240px)
+  // - 4 rounds (16 players):  1.5x spacing (216px)
+  // - 5 rounds (32 players):  1.4x spacing (202px)
+  // - 6 rounds (64 players):  1.33x spacing (192px)
+  const spacingMultiplier = 1 + (2 / numRounds);
 
   const firstRoundSpacing = baseSpacing * spacingMultiplier;
 
