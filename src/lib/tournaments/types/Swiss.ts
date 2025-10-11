@@ -2,6 +2,7 @@
  * Swiss System Tournament
  * Participants are paired with others of similar running scores
  * No participant faces the same opponent twice
+ * Supports both head-to-head (1v1) and multi-player matches
  */
 
 import { BaseTournament } from '../BaseTournament';
@@ -12,6 +13,11 @@ import type {
   Standing,
   MatchResult,
 } from '../types';
+import {
+  getPointsForPlacement,
+  calculateMatchPointsFromPlacement,
+  getDefaultPointsSystem,
+} from '../pointsSystems';
 
 interface ParticipantScore {
   participantId: string;
@@ -31,6 +37,16 @@ export class SwissTournament extends BaseTournament<SwissOptions, SwissState> {
   constructor(options: SwissOptions, id?: string) {
     super(options, id);
     this.options = options;
+
+    // Set default points system and match points formula for multi-player
+    if (options.matchType === 'multi-player') {
+      if (!options.pointsSystem) {
+        this.options.pointsSystem = getDefaultPointsSystem('multi-player');
+      }
+      if (!options.matchPointsFormula) {
+        this.options.matchPointsFormula = 'proportional'; // Default to proportional for fairer pairing
+      }
+    }
 
     // Calculate number of rounds if not specified (typically log2(n) rounded up)
     this.numberOfRounds =
@@ -69,7 +85,27 @@ export class SwissTournament extends BaseTournament<SwissOptions, SwissState> {
     }
 
     const roundMatches: Match[] = [];
+    const isMultiPlayer = this.options.matchType === 'multi-player';
+    const playersPerMatch = this.options.playersPerMatch || 2;
 
+    if (!isMultiPlayer || playersPerMatch === 2) {
+      // Standard head-to-head pairing
+      this.generateHeadToHeadPairings(roundMatches);
+    } else {
+      // Multi-player grouping
+      this.generateMultiPlayerPairings(roundMatches, playersPerMatch);
+    }
+
+    // Assign match numbers
+    const existingMatches = this.rounds.flat().length;
+    roundMatches.forEach((match, index) => {
+      match.matchNumber = existingMatches + index + 1;
+    });
+
+    this.rounds.push(roundMatches);
+  }
+
+  private generateHeadToHeadPairings(roundMatches: Match[]): void {
     // Get participants sorted by their current score
     const sortedParticipants = [...this.participants]
       .map((p) => ({
@@ -155,14 +191,80 @@ export class SwissTournament extends BaseTournament<SwissOptions, SwissState> {
 
       roundMatches.push(byeMatch);
     }
+  }
 
-    // Assign match numbers
-    const existingMatches = this.rounds.flat().length;
-    roundMatches.forEach((match, index) => {
-      match.matchNumber = existingMatches + index + 1;
-    });
+  private generateMultiPlayerPairings(roundMatches: Match[], playersPerMatch: number): void {
+    // Get participants sorted by their current score
+    const sortedParticipants = [...this.participants]
+      .map((p) => ({
+        participant: p,
+        score: this.participantScores.get(p.id)!,
+      }))
+      .sort((a, b) => {
+        // Sort by match points, then game points
+        if (a.score.matchPoints !== b.score.matchPoints) {
+          return b.score.matchPoints - a.score.matchPoints;
+        }
+        return b.score.gamePoints - a.score.gamePoints;
+      });
 
-    this.rounds.push(roundMatches);
+    const ungrouped = new Set(sortedParticipants.map((sp) => sp.participant.id));
+
+    // Create groups of playersPerMatch with similar scores
+    while (ungrouped.size >= 2) {
+      const group: string[] = [];
+
+      // Try to create a group of playersPerMatch participants
+      for (const sp of sortedParticipants) {
+        if (group.length >= playersPerMatch) break;
+
+        if (ungrouped.has(sp.participant.id)) {
+          // Check if this participant has already played with everyone in the group
+          const alreadyPlayedAll = group.every((existingId) => {
+            const score = this.participantScores.get(sp.participant.id)!;
+            return score.opponentIds.includes(existingId);
+          });
+
+          // Add to group if they haven't played with everyone (or if we're desperate)
+          if (!alreadyPlayedAll || ungrouped.size <= playersPerMatch) {
+            group.push(sp.participant.id);
+            ungrouped.delete(sp.participant.id);
+          }
+        }
+      }
+
+      // Create match if we have at least 2 participants
+      if (group.length >= 2) {
+        const match = this.createMatch(group, this.rounds.length + 1);
+        roundMatches.push(match);
+      } else {
+        // Not enough participants left, break
+        break;
+      }
+    }
+
+    // Handle remaining participants (bye situation)
+    if (ungrouped.size === 1) {
+      const byeParticipantId = ungrouped.values().next().value;
+      const byeMatch = this.createMatch([byeParticipantId], this.rounds.length + 1);
+
+      // Auto-complete bye match
+      byeMatch.status = 'completed';
+      byeMatch.result = {
+        winnerId: byeParticipantId,
+        score: {
+          [byeParticipantId]: this.options.pointsPerBye,
+        },
+        rankings: [{ participantId: byeParticipantId, position: 1 }],
+      };
+
+      // Update participant score for bye
+      const score = this.participantScores.get(byeParticipantId)!;
+      score.matchPoints += this.options.pointsPerBye;
+      score.matchesPlayed++;
+
+      roundMatches.push(byeMatch);
+    }
   }
 
   public getCurrentMatches(): Match[] {
@@ -192,51 +294,106 @@ export class SwissTournament extends BaseTournament<SwissOptions, SwissState> {
       throw new Error('Match already completed');
     }
 
-    // Validate result has scores
-    if (!result.score) {
-      throw new Error('Swiss system requires game scores for each match');
-    }
+    const isMultiPlayer = this.options.matchType === 'multi-player' && match.participantIds.length > 2;
 
-    // Calculate points for each participant
-    const [p1Id, p2Id] = match.participantIds;
-    const p1Score = result.score[p1Id] || 0;
-    const p2Score = result.score[p2Id] || 0;
+    if (isMultiPlayer) {
+      // Multi-player match result handling
+      if (!result.rankings || result.rankings.length === 0) {
+        throw new Error('Multi-player Swiss matches require rankings for all participants');
+      }
 
-    // Determine match result
-    if (p1Score > p2Score) {
-      result.winnerId = p1Id;
-      result.loserId = p2Id;
-    } else if (p2Score > p1Score) {
-      result.winnerId = p2Id;
-      result.loserId = p1Id;
+      if (result.rankings.length !== match.participantIds.length) {
+        throw new Error('All participants must be ranked');
+      }
+
+      // Calculate points based on placement if using points system
+      if (this.options.pointsSystem) {
+        result.score = {};
+        result.rankings.forEach((ranking) => {
+          const points = getPointsForPlacement(
+            this.options.pointsSystem!,
+            ranking.position,
+            match.participantIds.length
+          );
+          result.score![ranking.participantId] = points;
+        });
+      }
+
+      // Update participant scores
+      const matchPointsFormula = this.options.matchPointsFormula || 'proportional';
+
+      result.rankings.forEach((ranking) => {
+        const score = this.participantScores.get(ranking.participantId)!;
+
+        // Match points from placement
+        const matchPoints = calculateMatchPointsFromPlacement(
+          ranking.position,
+          match.participantIds.length,
+          matchPointsFormula
+        );
+        score.matchPoints += matchPoints;
+
+        // Game points from placement points (if available)
+        if (result.score && result.score[ranking.participantId]) {
+          score.gamePoints += result.score[ranking.participantId] * this.options.pointsPerGameWin;
+        }
+
+        // Track opponents
+        match.participantIds.forEach((oppId) => {
+          if (oppId !== ranking.participantId && !score.opponentIds.includes(oppId)) {
+            score.opponentIds.push(oppId);
+          }
+        });
+
+        score.matchesPlayed++;
+      });
     } else {
-      result.isTie = true;
+      // Head-to-head match handling
+      if (!result.score) {
+        throw new Error('Swiss system requires game scores for each match');
+      }
+
+      // Calculate points for each participant
+      const [p1Id, p2Id] = match.participantIds;
+      const p1Score = result.score[p1Id] || 0;
+      const p2Score = result.score[p2Id] || 0;
+
+      // Determine match result
+      if (p1Score > p2Score) {
+        result.winnerId = p1Id;
+        result.loserId = p2Id;
+      } else if (p2Score > p1Score) {
+        result.winnerId = p2Id;
+        result.loserId = p1Id;
+      } else {
+        result.isTie = true;
+      }
+
+      // Update participant scores
+      const score1 = this.participantScores.get(p1Id)!;
+      const score2 = this.participantScores.get(p2Id)!;
+
+      // Match points
+      if (result.isTie) {
+        score1.matchPoints += this.options.pointsPerMatchTie;
+        score2.matchPoints += this.options.pointsPerMatchTie;
+      } else if (result.winnerId === p1Id) {
+        score1.matchPoints += this.options.pointsPerMatchWin;
+      } else {
+        score2.matchPoints += this.options.pointsPerMatchWin;
+      }
+
+      // Game/set points
+      score1.gamePoints += p1Score * this.options.pointsPerGameWin;
+      score2.gamePoints += p2Score * this.options.pointsPerGameWin;
+
+      // Track opponents
+      score1.opponentIds.push(p2Id);
+      score2.opponentIds.push(p1Id);
+
+      score1.matchesPlayed++;
+      score2.matchesPlayed++;
     }
-
-    // Update participant scores
-    const score1 = this.participantScores.get(p1Id)!;
-    const score2 = this.participantScores.get(p2Id)!;
-
-    // Match points
-    if (result.isTie) {
-      score1.matchPoints += this.options.pointsPerMatchTie;
-      score2.matchPoints += this.options.pointsPerMatchTie;
-    } else if (result.winnerId === p1Id) {
-      score1.matchPoints += this.options.pointsPerMatchWin;
-    } else {
-      score2.matchPoints += this.options.pointsPerMatchWin;
-    }
-
-    // Game/set points
-    score1.gamePoints += p1Score * this.options.pointsPerGameWin;
-    score2.gamePoints += p2Score * this.options.pointsPerGameWin;
-
-    // Track opponents
-    score1.opponentIds.push(p2Id);
-    score2.opponentIds.push(p1Id);
-
-    score1.matchesPlayed++;
-    score2.matchesPlayed++;
 
     // Mark match as completed
     match.result = result;

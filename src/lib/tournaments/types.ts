@@ -10,11 +10,23 @@ export type TournamentType =
   | 'swiss'
   | 'free-for-all';
 
+// Match Type
+export type MatchType = 'head-to-head' | 'multi-player';
+
+// Points System Types
+export type PointsSystemType = 'f1' | 'mario-kart' | 'linear' | 'winner-takes-most' | 'custom';
+
+export interface PointsSystemConfig {
+  type: PointsSystemType;
+  customPoints?: number[]; // For 'custom' type
+}
+
 // Participant
 export interface Participant {
   id: string;
   name: string;
   seed?: number; // Optional seeding for bracket tournaments
+  isNPC?: boolean; // Flag for AI/NPC participants (future use)
 }
 
 // Match Status
@@ -68,6 +80,9 @@ export interface Standing {
 export interface BaseTournamentOptions {
   name: string;
   participantNames: string[];
+  // Multi-player options
+  matchType?: MatchType; // Default: 'head-to-head'
+  playersPerMatch?: number; // Default: 2
 }
 
 // Single Elimination Options
@@ -75,6 +90,8 @@ export interface SingleEliminationOptions extends BaseTournamentOptions {
   type: 'single-elimination';
   thirdPlaceMatch: boolean;
   tieBreakers: boolean;
+  // Multi-player options
+  advancementRule?: 'winner-only'; // Only winner-only supported for single elimination
 }
 
 // Double Elimination Options
@@ -89,6 +106,8 @@ export interface RoundRobinOptions extends BaseTournamentOptions {
   type: 'round-robin';
   rankingMethod: 'wins' | 'points';
   rounds: 1 | 2 | 3; // How many times participants play each other
+  // Multi-player options
+  pointsSystem?: PointsSystemConfig; // For multi-player mode
 }
 
 // Swiss Options
@@ -100,12 +119,19 @@ export interface SwissOptions extends BaseTournamentOptions {
   pointsPerGameTie: number;
   pointsPerBye: number;
   numberOfRounds?: number; // Optional, can be calculated
+  // Multi-player options
+  pointsSystem?: PointsSystemConfig; // For multi-player match scoring
+  matchPointsFormula?: 'winner-only' | 'proportional'; // How placement converts to match points
 }
 
 // Free For All Options
 export interface FreeForAllOptions extends BaseTournamentOptions {
   type: 'free-for-all';
   participantsPerMatch: number;
+  // Enhancement options
+  advancementRule?: 'winner-only' | 'top-n'; // How many advance per match
+  advancementCount?: number; // Required if advancementRule is 'top-n'
+  pointsSystem?: PointsSystemConfig; // Optional points tracking
 }
 
 // Union of all tournament options

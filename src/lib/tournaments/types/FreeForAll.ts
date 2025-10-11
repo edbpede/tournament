@@ -1,6 +1,7 @@
 /**
  * Free For All Tournament
  * Multiple participants per match, winners advance to next round
+ * Supports winner-only or top-N advancement
  */
 
 import { BaseTournament } from '../BaseTournament';
@@ -11,6 +12,7 @@ import type {
   Standing,
   MatchResult,
 } from '../types';
+import { getPointsForPlacement } from '../pointsSystems';
 
 export class FreeForAllTournament extends BaseTournament<
   FreeForAllOptions,
@@ -28,6 +30,16 @@ export class FreeForAllTournament extends BaseTournament<
     // Validate participants per match
     if (options.participantsPerMatch < 2) {
       throw new Error('Participants per match must be at least 2');
+    }
+
+    // Validate advancement rule
+    if (options.advancementRule === 'top-n') {
+      if (!options.advancementCount || options.advancementCount < 1) {
+        throw new Error('advancementCount must be at least 1 when using top-n advancement');
+      }
+      if (options.advancementCount >= options.participantsPerMatch) {
+        throw new Error('advancementCount must be less than participantsPerMatch');
+      }
     }
   }
 
@@ -133,13 +145,31 @@ export class FreeForAllTournament extends BaseTournament<
       }
     }
 
+    // Calculate points if points system is enabled
+    if (this.options.pointsSystem) {
+      result.score = {};
+      result.rankings.forEach((ranking) => {
+        const points = getPointsForPlacement(
+          this.options.pointsSystem!,
+          ranking.position,
+          match.participantIds.length
+        );
+        result.score![ranking.participantId] = points;
+      });
+    }
+
     // Mark match as completed
     match.result = result;
     match.status = 'completed';
 
-    // Eliminate participants who didn't win (only winner advances)
+    // Determine advancement threshold
+    const advancementRule = this.options.advancementRule || 'winner-only';
+    const advancementThreshold =
+      advancementRule === 'top-n' ? (this.options.advancementCount || 1) : 1;
+
+    // Eliminate participants who didn't place in top N
     result.rankings.forEach((ranking) => {
-      if (ranking.position > 1) {
+      if (ranking.position > advancementThreshold) {
         this.eliminatedParticipants.add(ranking.participantId);
       }
     });
@@ -158,28 +188,51 @@ export class FreeForAllTournament extends BaseTournament<
 
     if (!allComplete) return;
 
-    // Get winners from current round
-    const winners: string[] = [];
+    // Get advancing participants from current round
+    const advancingParticipants: string[] = [];
+    const advancementRule = this.options.advancementRule || 'winner-only';
+    const advancementThreshold =
+      advancementRule === 'top-n' ? (this.options.advancementCount || 1) : 1;
 
     currentRoundMatches.forEach((match) => {
       if (match.result?.rankings) {
-        const winner = match.result.rankings.find((r) => r.position === 1);
-        if (winner) {
-          winners.push(winner.participantId);
-        }
+        // Get top N finishers
+        const advancers = match.result.rankings
+          .filter((r) => r.position <= advancementThreshold)
+          .map((r) => r.participantId);
+        advancingParticipants.push(...advancers);
       }
     });
 
-    // Check if tournament is complete (only one winner left)
-    if (winners.length === 1) {
+    // Check if tournament is complete
+    const minParticipantsForNextRound = 2;
+
+    if (advancingParticipants.length < minParticipantsForNextRound) {
+      // Tournament complete - only one or zero participants left
       this.completed = true;
       return;
     }
 
-    // If we have enough winners for another round, generate it
-    if (winners.length >= 2) {
+    // Special case: if we have exactly the right number for one final match
+    if (
+      advancingParticipants.length <= this.options.participantsPerMatch &&
+      advancingParticipants.length >= 2
+    ) {
+      // Create final match if not already created
+      if (this.rounds.length === this.currentRound) {
+        this.currentRound++;
+        this.generateRound(advancingParticipants);
+      } else {
+        // Final match already exists and is complete
+        this.completed = true;
+      }
+      return;
+    }
+
+    // Generate next round
+    if (advancingParticipants.length >= 2) {
       this.currentRound++;
-      this.generateRound(winners);
+      this.generateRound(advancingParticipants);
     } else {
       // Tournament complete
       this.completed = true;

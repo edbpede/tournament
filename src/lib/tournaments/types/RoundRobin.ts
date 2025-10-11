@@ -1,6 +1,7 @@
 /**
  * Round Robin Tournament
  * Each participant plays all other participants
+ * Supports both head-to-head (1v1) and multi-player matches
  */
 
 import { BaseTournament } from '../BaseTournament';
@@ -11,6 +12,7 @@ import type {
   Standing,
   MatchResult,
 } from '../types';
+import { generatePointsArray, getPointsForPlacement, getDefaultPointsSystem } from '../pointsSystems';
 
 export class RoundRobinTournament extends BaseTournament<
   RoundRobinOptions,
@@ -23,6 +25,11 @@ export class RoundRobinTournament extends BaseTournament<
   constructor(options: RoundRobinOptions, id?: string) {
     super(options, id);
     this.options = options;
+
+    // Set default points system if multi-player and not specified
+    if (options.matchType === 'multi-player' && !options.pointsSystem) {
+      this.options.pointsSystem = getDefaultPointsSystem('multi-player');
+    }
   }
 
   public start(): void {
@@ -43,6 +50,24 @@ export class RoundRobinTournament extends BaseTournament<
   private generateMatches(): void {
     this.matches = [];
 
+    const isMultiPlayer = this.options.matchType === 'multi-player';
+    const playersPerMatch = this.options.playersPerMatch || 2;
+
+    if (!isMultiPlayer || playersPerMatch === 2) {
+      // Standard head-to-head round robin
+      this.generateHeadToHeadMatches();
+    } else {
+      // Multi-player round robin with groups
+      this.generateMultiPlayerMatches();
+    }
+
+    // Assign match numbers
+    this.matches.forEach((match, index) => {
+      match.matchNumber = index + 1;
+    });
+  }
+
+  private generateHeadToHeadMatches(): void {
     // Generate matches for each round
     for (let round = 1; round <= this.options.rounds; round++) {
       // Create a match between every pair of participants
@@ -56,11 +81,41 @@ export class RoundRobinTournament extends BaseTournament<
         }
       }
     }
+  }
 
-    // Assign match numbers
-    this.matches.forEach((match, index) => {
-      match.matchNumber = index + 1;
-    });
+  private generateMultiPlayerMatches(): void {
+    const playersPerMatch = this.options.playersPerMatch || 4;
+
+    // For multi-player round robin, we create rotating groups
+    // This ensures participants play with different opponents across rounds
+    for (let round = 1; round <= this.options.rounds; round++) {
+      // Rotate participants for each round to create different groupings
+      const rotatedParticipants = this.rotateParticipants(round - 1);
+
+      // Create groups of playersPerMatch
+      for (let i = 0; i < rotatedParticipants.length; i += playersPerMatch) {
+        const group = rotatedParticipants.slice(i, i + playersPerMatch);
+
+        // Only create match if we have at least 2 participants
+        if (group.length >= 2) {
+          const match = this.createMatch(
+            group.map(p => p.id),
+            round
+          );
+          this.matches.push(match);
+        }
+      }
+    }
+  }
+
+  private rotateParticipants(rotation: number): typeof this.participants {
+    // Rotate participants array for better group distribution
+    const n = this.participants.length;
+    const offset = (rotation * Math.floor(n / 2)) % n;
+    return [
+      ...this.participants.slice(offset),
+      ...this.participants.slice(0, offset),
+    ];
   }
 
   public getCurrentMatches(): Match[] {
@@ -87,13 +142,40 @@ export class RoundRobinTournament extends BaseTournament<
       throw new Error('Match already completed');
     }
 
-    // Validate result based on ranking method
-    if (this.options.rankingMethod === 'points' && !result.score) {
-      throw new Error('Score is required when ranking by points');
-    }
+    const isMultiPlayer = this.options.matchType === 'multi-player' && match.participantIds.length > 2;
 
-    if (this.options.rankingMethod === 'wins' && !result.winnerId && !result.isTie) {
-      throw new Error('Winner or tie must be specified when ranking by wins');
+    // Validate result based on match type and ranking method
+    if (isMultiPlayer) {
+      // Multi-player matches require rankings
+      if (!result.rankings || result.rankings.length === 0) {
+        throw new Error('Multi-player matches require rankings for all participants');
+      }
+
+      if (result.rankings.length !== match.participantIds.length) {
+        throw new Error('All participants must be ranked');
+      }
+
+      // Auto-calculate points based on rankings if using points system
+      if (this.options.rankingMethod === 'points' && this.options.pointsSystem) {
+        result.score = {};
+        result.rankings.forEach((ranking) => {
+          const points = getPointsForPlacement(
+            this.options.pointsSystem!,
+            ranking.position,
+            match.participantIds.length
+          );
+          result.score![ranking.participantId] = points;
+        });
+      }
+    } else {
+      // Head-to-head validation
+      if (this.options.rankingMethod === 'points' && !result.score) {
+        throw new Error('Score is required when ranking by points');
+      }
+
+      if (this.options.rankingMethod === 'wins' && !result.winnerId && !result.isTie) {
+        throw new Error('Winner or tie must be specified when ranking by wins');
+      }
     }
 
     // Record result
@@ -128,6 +210,7 @@ export class RoundRobinTournament extends BaseTournament<
 
   public getStandings(): Standing[] {
     const standings: Standing[] = [];
+    const isMultiPlayer = this.options.matchType === 'multi-player';
 
     this.participants.forEach((participant) => {
       const participantMatches = this.matches.filter((m) =>
@@ -144,28 +227,54 @@ export class RoundRobinTournament extends BaseTournament<
       completed.forEach((match) => {
         const result = match.result!;
 
-        if (this.options.rankingMethod === 'wins') {
-          if (result.isTie) {
-            ties++;
-          } else if (result.winnerId === participant.id) {
-            wins++;
-          } else {
-            losses++;
-          }
-        } else if (this.options.rankingMethod === 'points' && result.score) {
-          const participantScore = result.score[participant.id] || 0;
-          points += participantScore;
+        if (isMultiPlayer && match.participantIds.length > 2) {
+          // Multi-player match scoring
+          if (result.rankings) {
+            const participantRanking = result.rankings.find(
+              (r) => r.participantId === participant.id
+            );
 
-          // Also count wins/losses based on score comparison
-          const opponentId = match.participantIds.find((id) => id !== participant.id);
-          if (opponentId) {
-            const opponentScore = result.score[opponentId] || 0;
-            if (participantScore > opponentScore) {
-              wins++;
-            } else if (participantScore < opponentScore) {
-              losses++;
-            } else {
+            if (participantRanking) {
+              // Count 1st place as win
+              if (participantRanking.position === 1) {
+                wins++;
+              } else if (participantRanking.position === match.participantIds.length) {
+                // Last place counts as loss
+                losses++;
+              }
+              // Middle placements don't count as wins or losses
+            }
+          }
+
+          // Add points if using points system
+          if (result.score) {
+            points += result.score[participant.id] || 0;
+          }
+        } else {
+          // Head-to-head match scoring
+          if (this.options.rankingMethod === 'wins') {
+            if (result.isTie) {
               ties++;
+            } else if (result.winnerId === participant.id) {
+              wins++;
+            } else {
+              losses++;
+            }
+          } else if (this.options.rankingMethod === 'points' && result.score) {
+            const participantScore = result.score[participant.id] || 0;
+            points += participantScore;
+
+            // Also count wins/losses based on score comparison
+            const opponentId = match.participantIds.find((id) => id !== participant.id);
+            if (opponentId) {
+              const opponentScore = result.score[opponentId] || 0;
+              if (participantScore > opponentScore) {
+                wins++;
+              } else if (participantScore < opponentScore) {
+                losses++;
+              } else {
+                ties++;
+              }
             }
           }
         }
@@ -178,13 +287,13 @@ export class RoundRobinTournament extends BaseTournament<
         wins,
         losses,
         ties,
-        points: this.options.rankingMethod === 'points' ? points : undefined,
+        points: this.options.rankingMethod === 'points' || isMultiPlayer ? points : undefined,
         matchesPlayed: completed.length,
       });
     });
 
     // Sort standings
-    if (this.options.rankingMethod === 'wins') {
+    if (this.options.rankingMethod === 'wins' && !isMultiPlayer) {
       // Sort by wins (descending), then by losses (ascending)
       standings.sort((a, b) => {
         if (a.wins !== b.wins) return b.wins - a.wins;

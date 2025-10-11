@@ -10,6 +10,7 @@ import { DoubleEliminationTournament } from './types/DoubleElimination';
 import { RoundRobinTournament } from './types/RoundRobin';
 import { SwissTournament } from './types/Swiss';
 import { FreeForAllTournament } from './types/FreeForAll';
+import { validatePointsSystem } from './pointsSystems';
 
 /**
  * Create a new tournament instance from options
@@ -92,6 +93,8 @@ export function getDefaultOptions(type: TournamentType): Partial<TournamentOptio
   const base = {
     name: 'New Tournament',
     participantNames: [],
+    matchType: 'head-to-head' as const,
+    playersPerMatch: 2,
   };
 
   switch (type) {
@@ -101,6 +104,7 @@ export function getDefaultOptions(type: TournamentType): Partial<TournamentOptio
         type,
         thirdPlaceMatch: false,
         tieBreakers: true,
+        advancementRule: 'winner-only',
       };
 
     case 'double-elimination':
@@ -117,6 +121,7 @@ export function getDefaultOptions(type: TournamentType): Partial<TournamentOptio
         type,
         rankingMethod: 'wins',
         rounds: 1,
+        pointsSystem: undefined, // Set dynamically when matchType is multi-player
       };
 
     case 'swiss':
@@ -128,6 +133,8 @@ export function getDefaultOptions(type: TournamentType): Partial<TournamentOptio
         pointsPerGameWin: 1,
         pointsPerGameTie: 0,
         pointsPerBye: 3,
+        pointsSystem: undefined, // Set dynamically when matchType is multi-player
+        matchPointsFormula: 'proportional',
       };
 
     case 'free-for-all':
@@ -135,6 +142,8 @@ export function getDefaultOptions(type: TournamentType): Partial<TournamentOptio
         ...base,
         type,
         participantsPerMatch: 4,
+        advancementRule: 'winner-only',
+        pointsSystem: undefined, // Optional
       };
 
     default: {
@@ -166,9 +175,38 @@ export function validateOptions(options: Partial<TournamentOptions>): string[] {
     }
   }
 
+  // Multi-player options validation
+  const matchType = (options as any).matchType;
+  const playersPerMatch = (options as any).playersPerMatch;
+
+  if (matchType === 'multi-player') {
+    if (!playersPerMatch || playersPerMatch < 2) {
+      errors.push('Players per match must be at least 2 for multi-player matches');
+    }
+
+    if (playersPerMatch && options.participantNames && playersPerMatch > options.participantNames.length) {
+      errors.push('Players per match cannot exceed total participant count');
+    }
+
+    // Validate points system if provided
+    const pointsSystem = (options as any).pointsSystem;
+    if (pointsSystem) {
+      try {
+        validatePointsSystem(pointsSystem);
+      } catch (err) {
+        errors.push((err as Error).message);
+      }
+    }
+  }
+
   // Type-specific validation
   if (options.type === 'free-for-all') {
-    const ffa = options as Partial<typeof options & { participantsPerMatch: number }>;
+    const ffa = options as Partial<typeof options & {
+      participantsPerMatch: number;
+      advancementRule?: 'winner-only' | 'top-n';
+      advancementCount?: number;
+    }>;
+
     if (
       ffa.participantsPerMatch &&
       (ffa.participantsPerMatch < 2 || ffa.participantsPerMatch > (options.participantNames?.length || 0))
@@ -176,6 +214,17 @@ export function validateOptions(options: Partial<TournamentOptions>): string[] {
       errors.push(
         `Participants per match must be between 2 and ${options.participantNames?.length || 0}`
       );
+    }
+
+    // Validate advancement options
+    if (ffa.advancementRule === 'top-n') {
+      if (!ffa.advancementCount || ffa.advancementCount < 1) {
+        errors.push('Advancement count must be at least 1 when using top-n advancement');
+      }
+
+      if (ffa.advancementCount && ffa.participantsPerMatch && ffa.advancementCount >= ffa.participantsPerMatch) {
+        errors.push('Advancement count must be less than participants per match');
+      }
     }
   }
 
@@ -215,6 +264,14 @@ export function validateOptions(options: Partial<TournamentOptions>): string[] {
     const rr = options as Partial<typeof options & { rounds: number }>;
     if (rr.rounds && (rr.rounds < 1 || rr.rounds > 3)) {
       errors.push('Rounds must be between 1 and 3');
+    }
+
+    // For multi-player round robin with wins-based ranking, require points system
+    if (matchType === 'multi-player' && playersPerMatch && playersPerMatch > 2) {
+      const rankingMethod = (options as any).rankingMethod;
+      if (rankingMethod === 'points' && !(options as any).pointsSystem) {
+        errors.push('Points system is required for multi-player round robin with points ranking');
+      }
     }
   }
 
