@@ -162,17 +162,20 @@ export function calculateBracketLayout(
   const TOP_OFFSET = 60; // Space for round header badge and padding
 
   // Calculate base spacing for first round matches
-  // Use a simple multiplier that scales reasonably with bracket depth
+  // Use a formula-based multiplier that scales inversely with bracket depth
+  // Smaller tournaments need MORE spacing (to prevent overlap)
+  // Larger tournaments need LESS spacing (to prevent excessive gaps)
   const numRounds = rounds.length;
   const baseSpacing = baseMatchHeight + matchGap;
 
-  // Use a conservative multiplier that grows more slowly than exponential
-  // This ensures adequate spacing without excessive gaps
-  // For 2 rounds: 1x, 3 rounds: 1.5x, 4 rounds: 2x, 5+ rounds: 2.5x
-  let spacingMultiplier = 1;
-  if (numRounds === 3) spacingMultiplier = 1.5;
-  else if (numRounds === 4) spacingMultiplier = 2;
-  else if (numRounds >= 5) spacingMultiplier = 2.5;
+  // Dynamic multiplier: decreases as tournament size increases
+  // Formula: 1 + (3 / numRounds)
+  // - 2 rounds (4 players):   2.5x spacing
+  // - 3 rounds (8 players):   2.0x spacing
+  // - 4 rounds (16 players):  1.75x spacing
+  // - 5 rounds (32 players):  1.6x spacing
+  // - 6 rounds (64 players):  1.5x spacing
+  const spacingMultiplier = 1 + (3 / numRounds);
 
   const firstRoundSpacing = baseSpacing * spacingMultiplier;
 
