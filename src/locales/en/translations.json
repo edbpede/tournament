@@ -115,37 +115,22 @@
   },
   "landing": {
     "hero": {
-      "title": "TournaGen",
-      "tagline": "Tournament Generator",
-      "subtitle": "Manage tournaments with ease. Supports 5 tournament formats - all in your browser.",
-      "cta": "Get Started"
+      "cta": "Enter TournaGen"
     },
-    "types": {
-      "title": "5 Tournament Formats",
-      "subtitle": "Choose the perfect format for your competition"
+    "tournamentIcons": {
+      "singleElimination": "Single elimination - lose once and you're out",
+      "doubleElimination": "Double elimination - two chances to stay in the game",
+      "roundRobin": "Round robin - everyone plays everyone",
+      "swiss": "Swiss system - paired by similar performance",
+      "freeForAll": "Free for all - multiple competitors per match"
     },
     "features": {
-      "title": "Why Choose TournaGen?",
-      "clientSide": {
-        "title": "Client-Side Only",
-        "description": "All data is stored locally in your browser. No servers, no uploads, complete privacy."
-      },
-      "noAccount": {
-        "title": "No Account Needed",
-        "description": "Start organizing tournaments immediately. No sign-up, no login, no hassle."
-      },
-      "multilingual": {
-        "title": "Multilingual Support",
-        "description": "Available in English and Danish. Switch languages anytime with one click."
-      }
-    },
-    "cta": {
-      "title": "Ready to Get Started?",
-      "description": "Create your first tournament in seconds. No installation required.",
-      "button": "Launch TournaGen"
-    },
-    "footer": {
-      "text": "© 2025 TournaGen. All rights reserved."
+      "clientSide": "100% Client-Side",
+      "clientSideDesc": "Runs entirely in your browser. No servers, complete privacy.",
+      "noAccount": "No Account Required",
+      "noAccountDesc": "Start instantly. No sign-up, no login required.",
+      "multiLanguage": "Multi-Language Support",
+      "multiLanguageDesc": "Available in English and Danish with more coming soon."
     }
   }
 }

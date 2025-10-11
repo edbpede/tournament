@@ -1,12 +1,18 @@
 /**
- * Landing Page Component
- * Welcome screen with app overview and CTA to enter the tournament manager
+ * Landing Page Component - Redesigned
+ * Centerpiece logo with orbiting tournament type icons
  */
 
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import logoSvg from '../assets/logo.svg?url';
 import '../lib/i18n/config';
 
@@ -16,6 +22,7 @@ interface LandingPageProps {
 
 export default function LandingPage({ onEnter }: LandingPageProps) {
   const { t, i18n } = useTranslation();
+  const [activeIcon, setActiveIcon] = useState<string | null>(null);
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'en' ? 'da' : 'en';
@@ -23,183 +30,149 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
   };
 
   const tournamentTypes = [
-    {
-      key: 'singleElimination',
-      icon: '🏆',
-    },
-    {
-      key: 'doubleElimination',
-      icon: '⚔️',
-    },
-    {
-      key: 'roundRobin',
-      icon: '🔄',
-    },
-    {
-      key: 'swiss',
-      icon: '♟️',
-    },
-    {
-      key: 'freeForAll',
-      icon: '🎯',
-    },
+    { key: 'singleElimination', icon: '🏆', angle: 0 },
+    { key: 'doubleElimination', icon: '⚔️', angle: 72 },
+    { key: 'roundRobin', icon: '🔄', angle: 144 },
+    { key: 'swiss', icon: '♟️', angle: 216 },
+    { key: 'freeForAll', icon: '🎯', angle: 288 },
   ];
 
   const features = [
     {
-      titleKey: 'landing.features.clientSide.title',
-      descriptionKey: 'landing.features.clientSide.description',
+      title: t('landing.features.clientSide'),
+      description: t('landing.features.clientSideDesc'),
       icon: '💾',
     },
     {
-      titleKey: 'landing.features.noAccount.title',
-      descriptionKey: 'landing.features.noAccount.description',
+      title: t('landing.features.noAccount'),
+      description: t('landing.features.noAccountDesc'),
       icon: '🔓',
     },
     {
-      titleKey: 'landing.features.multilingual.title',
-      descriptionKey: 'landing.features.multilingual.description',
+      title: t('landing.features.multiLanguage'),
+      description: t('landing.features.multiLanguageDesc'),
       icon: '🌐',
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-background">
       {/* Header with Language Switcher */}
-      <header className="container mx-auto px-4 py-6 flex justify-end">
+      <header className="fixed top-0 right-0 z-50 p-6">
         <Button
           variant="outline"
           size="sm"
           onClick={toggleLanguage}
-          className="gap-2"
+          className="gap-2 backdrop-blur-sm bg-background/80"
         >
           🌐 {i18n.language === 'en' ? 'Dansk' : 'English'}
         </Button>
       </header>
 
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-12 md:py-20">
-        <div className="flex flex-col items-center text-center space-y-8">
-          <div className="relative">
+      {/* Hero Section - Centerpiece Logo with Orbiting Icons */}
+      <section className="relative flex items-center justify-center min-h-[85vh] px-4 py-12">
+        <div className="relative w-full max-w-4xl mx-auto">
+          {/* Central Logo */}
+          <div className="flex items-center justify-center">
             <img
               src={logoSvg}
               alt="TournaGen Logo"
-              className="w-42 h-42 md:w-58 md:h-58 animate-in fade-in duration-1000"
+              className="w-64 h-64 md:w-96 md:h-96 lg:w-[28rem] lg:h-[28rem] animate-in fade-in zoom-in duration-1000"
+              style={{ filter: 'drop-shadow(0 10px 30px rgba(0, 0, 0, 0.15))' }}
             />
           </div>
 
-          <div className="space-y-4 max-w-3xl">
-            <div className="space-y-2">
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight animate-in slide-in-from-bottom-4 duration-1000">
-                {t('landing.hero.title')}
-              </h1>
-              <p className="text-lg md:text-xl text-muted-foreground/80 font-medium animate-in slide-in-from-bottom-4 duration-1000 delay-75">
-                {t('landing.hero.tagline')}
-              </p>
+          {/* Orbiting Tournament Type Icons */}
+          <TooltipProvider delayDuration={200}>
+            <div className="absolute inset-0 pointer-events-none">
+              {tournamentTypes.map((type, index) => (
+                <div
+                  key={type.key}
+                  className="absolute top-1/2 left-1/2 pointer-events-auto"
+                  style={{
+                    animation: 'orbit 60s linear infinite',
+                    animationDelay: `${-index * 12}s`,
+                  }}
+                >
+                  <Tooltip open={activeIcon === type.key}>
+                    <TooltipTrigger asChild>
+                      <button
+                        className="absolute -translate-x-1/2 -translate-y-1/2 text-5xl md:text-6xl lg:text-7xl transition-all duration-300 hover:scale-125 focus:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
+                        style={{
+                          left: `calc(140px + 15vw)`,
+                          filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2))',
+                        }}
+                        onClick={() => setActiveIcon(activeIcon === type.key ? null : type.key)}
+                        onMouseEnter={() => setActiveIcon(type.key)}
+                        onMouseLeave={() => setActiveIcon(null)}
+                        aria-label={t(`tournamentTypes.${type.key}`)}
+                      >
+                        {type.icon}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      className="max-w-xs text-center"
+                      sideOffset={10}
+                    >
+                      <p className="font-semibold mb-1">
+                        {t(`tournamentTypes.${type.key}`)}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {t(`landing.tournamentIcons.${type.key}`)}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              ))}
             </div>
-            <p className="text-xl md:text-2xl text-muted-foreground animate-in slide-in-from-bottom-4 duration-1000 delay-100">
-              {t('landing.hero.subtitle')}
-            </p>
-          </div>
-
-          <Button
-            size="lg"
-            onClick={onEnter}
-            className="text-lg px-8 py-6 animate-in slide-in-from-bottom-4 duration-1000 delay-200"
-          >
-            {t('landing.hero.cta')} →
-          </Button>
-        </div>
-      </section>
-
-      {/* Tournament Types Section */}
-      <section className="container mx-auto px-4 py-12 md:py-16">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold mb-3">
-            {t('landing.types.title')}
-          </h2>
-          <p className="text-lg text-muted-foreground">
-            {t('landing.types.subtitle')}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 max-w-6xl mx-auto">
-          {tournamentTypes.map((type, index) => (
-            <Card
-              key={type.key}
-              className="hover:shadow-lg transition-shadow duration-300 animate-in fade-in slide-in-from-bottom-4"
-              style={{ animationDelay: `${index * 100 + 300}ms` }}
-            >
-              <CardHeader className="text-center pb-3">
-                <div className="text-4xl mb-2">{type.icon}</div>
-                <CardTitle className="text-lg">
-                  {t(`tournamentTypes.${type.key}`)}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-center text-sm">
-                  {t(`tournamentTypeDescriptions.${type.key}`)}
-                </CardDescription>
-              </CardContent>
-            </Card>
-          ))}
+          </TooltipProvider>
         </div>
       </section>
 
       {/* Features Section */}
       <section className="container mx-auto px-4 py-12 md:py-16">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold mb-3">
-            {t('landing.features.title')}
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {features.map((feature, index) => (
-            <div
-              key={feature.titleKey}
-              className="flex flex-col items-center text-center p-4 rounded-lg border bg-card hover:shadow-md transition-shadow duration-300 animate-in fade-in slide-in-from-bottom-4"
-              style={{ animationDelay: `${index * 100 + 500}ms` }}
+            <Card
+              key={feature.title}
+              className="p-6 text-center hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 border-muted/50"
+              style={{ animationDelay: `${index * 100 + 400}ms` }}
             >
-              <div className="text-3xl mb-2">{feature.icon}</div>
-              <h3 className="font-semibold text-sm mb-1">
-                {t(feature.titleKey)}
-              </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                {t(feature.descriptionKey)}
+              <div className="text-4xl mb-3">{feature.icon}</div>
+              <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {feature.description}
               </p>
-            </div>
+            </Card>
           ))}
         </div>
       </section>
 
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-16 md:py-20">
-        <Card className="max-w-2xl mx-auto text-center bg-primary/5 border-primary/20">
-          <CardHeader className="space-y-4 pt-8">
-            <CardTitle className="text-3xl md:text-4xl">
-              {t('landing.cta.title')}
-            </CardTitle>
-            <CardDescription className="text-lg">
-              {t('landing.cta.description')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pb-8">
-            <Button
-              size="lg"
-              onClick={onEnter}
-              className="text-lg px-10 py-6"
-            >
-              {t('landing.cta.button')} →
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
+          <Button
+            size="lg"
+            onClick={onEnter}
+            className="text-xl px-12 py-7 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+          >
+            {t('landing.hero.cta')} →
+          </Button>
+        </div>
       </section>
 
-      {/* Footer */}
-      <footer className="container mx-auto px-4 py-8 text-center text-sm text-muted-foreground border-t">
-        <p>{t('landing.footer.text')}</p>
-      </footer>
+      {/* CSS for Orbit Animation */}
+      <style>{`
+        @keyframes orbit {
+          from {
+            transform: rotate(0deg) translateX(calc(140px + 15vw)) rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg) translateX(calc(140px + 15vw)) rotate(-360deg);
+          }
+        }
+      `}</style>
     </div>
   );
 }

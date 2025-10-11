@@ -115,37 +115,22 @@
   },
   "landing": {
     "hero": {
-      "title": "TournaGen",
-      "tagline": "Turneringsgenerator",
-      "subtitle": "Administrer turneringer med lethed. Understøtter 5 turneringsformater - alt i din browser.",
-      "cta": "Kom i Gang"
+      "cta": "Åbn TournaGen"
     },
-    "types": {
-      "title": "5 Turneringsformater",
-      "subtitle": "Vælg det perfekte format til din konkurrence"
+    "tournamentIcons": {
+      "singleElimination": "Single elimination - tab én gang og du er ude",
+      "doubleElimination": "Double elimination - to chancer for at blive i spillet",
+      "roundRobin": "Round robin - alle spiller mod alle",
+      "swiss": "Swiss system - parret efter lignende præstation",
+      "freeForAll": "Free for all - flere deltagere per kamp"
     },
     "features": {
-      "title": "Hvorfor Vælge TournaGen?",
-      "clientSide": {
-        "title": "Kun Client-Side",
-        "description": "Alle data gemmes lokalt i din browser. Ingen servere, ingen uploads, fuldstændig privatliv."
-      },
-      "noAccount": {
-        "title": "Ingen Konto Nødvendig",
-        "description": "Begynd at organisere turneringer med det samme. Ingen tilmelding, ingen login, ingen besvær."
-      },
-      "multilingual": {
-        "title": "Flersproget Support",
-        "description": "Tilgængelig på engelsk og dansk. Skift sprog når som helst med et klik."
-      }
-    },
-    "cta": {
-      "title": "Klar til at Komme i Gang?",
-      "description": "Opret din første turnering på få sekunder. Ingen installation krævet.",
-      "button": "Start TournaGen"
-    },
-    "footer": {
-      "text": "© 2025 TournaGen. Alle rettigheder forbeholdes."
+      "clientSide": "100% Client-Side",
+      "clientSideDesc": "Kører helt i din browser. Ingen servere, fuldstændig privatliv.",
+      "noAccount": "Ingen Konto Påkrævet",
+      "noAccountDesc": "Start med det samme. Ingen tilmelding, ingen login påkrævet.",
+      "multiLanguage": "Flersproget Support",
+      "multiLanguageDesc": "Tilgængelig på engelsk og dansk med flere på vej."
     }
   }
 }
