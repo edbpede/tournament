@@ -53,6 +53,7 @@
   },
   "create": {
     "title": "Opret ny turnering",
+    "editTitle": "Rediger turnering",
     "step": {
       "type": "Type",
       "options": "Indstillinger",
@@ -68,9 +69,11 @@
     "participantsList": "Deltagere ({{count}})",
     "noParticipants": "Ingen deltagere tilføjet endnu",
     "createTournament": "Opret turnering",
+    "saveChanges": "Gem ændringer",
     "errorTitle": "Ret venligst følgende fejl:",
     "duplicateNameError": "Deltagernavne skal være unikke",
-    "createError": "Kunne ikke oprette turnering"
+    "createError": "Kunne ikke oprette turnering",
+    "tournamentNotFound": "Turneringen blev ikke fundet"
   },
   "options": {
     "thirdPlaceMatch": "Inkluder kamp om 3. pladsen",
@@ -118,6 +121,10 @@
   },
   "view": {
     "backToDashboard": "Tilbage til dashboardet",
+    "editLabel": "Rediger",
+    "editType": "Type",
+    "editOptions": "Indstillinger",
+    "editParticipants": "Deltagere",
     "bracket": "Turneringstræ",
     "matches": "Kampe",
     "currentMatches": "Aktuelle kampe",

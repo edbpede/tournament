@@ -28,9 +28,10 @@ import MatchResultDialog from './MatchResultDialog';
 interface Props {
   tournamentId: string;
   onBack: () => void;
+  onEdit: (id: string, step: 'type' | 'options' | 'participants') => void;
 }
 
-export default function TournamentView({ tournamentId, onBack }: Props) {
+export default function TournamentView({ tournamentId, onBack, onEdit }: Props) {
   const { t } = useTranslation();
   const [tournament, setTournament] = useState<BaseTournament | null>(null);
   const [tournamentState, setTournamentState] = useState<TournamentState | null>(null);
@@ -160,16 +161,47 @@ export default function TournamentView({ tournamentId, onBack }: Props) {
       <div className="max-w-[1920px] mx-auto">
         {/* Header */}
         <div className="mb-3">
-          <Button
-            variant="ghost"
-            onClick={onBack}
-            className="mb-2 -ml-2"
-          >
-            <svg className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            {t('view.backToDashboard')}
-          </Button>
+          <div className="flex items-center gap-2 mb-2 -ml-2">
+            <Button
+              variant="ghost"
+              onClick={onBack}
+            >
+              <svg className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              {t('view.backToDashboard')}
+            </Button>
+
+            <div className="h-6 w-px bg-gray-300"></div>
+
+            <div className="flex items-center gap-1">
+              <span className="text-sm text-gray-600 mr-1">{t('view.editLabel')}:</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEdit(tournamentId, 'type')}
+                className="h-8"
+              >
+                {t('view.editType')}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEdit(tournamentId, 'options')}
+                className="h-8"
+              >
+                {t('view.editOptions')}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEdit(tournamentId, 'participants')}
+                className="h-8"
+              >
+                {t('view.editParticipants')}
+              </Button>
+            </div>
+          </div>
 
           <div className="flex items-center justify-between">
             <div>

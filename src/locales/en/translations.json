@@ -53,6 +53,7 @@
   },
   "create": {
     "title": "Create New Tournament",
+    "editTitle": "Edit Tournament",
     "step": {
       "type": "Type",
       "options": "Options",
@@ -68,9 +69,11 @@
     "participantsList": "Participants ({{count}})",
     "noParticipants": "No participants added yet",
     "createTournament": "Create Tournament",
+    "saveChanges": "Save Changes",
     "errorTitle": "Please fix the following errors:",
     "duplicateNameError": "Participant names must be unique",
-    "createError": "Failed to create tournament"
+    "createError": "Failed to create tournament",
+    "tournamentNotFound": "Tournament not found"
   },
   "options": {
     "thirdPlaceMatch": "Include 3rd place match",
@@ -118,6 +121,10 @@
   },
   "view": {
     "backToDashboard": "Back to Dashboard",
+    "editLabel": "Edit",
+    "editType": "Type",
+    "editOptions": "Options",
+    "editParticipants": "Participants",
     "bracket": "Bracket",
     "matches": "Matches",
     "currentMatches": "Current Matches",

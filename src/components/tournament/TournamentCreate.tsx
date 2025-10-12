@@ -3,30 +3,49 @@
  * Multi-step form to create a new tournament
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TournamentType, TournamentOptions, MatchType, PointsSystemType } from '../../lib/tournaments/types';
 import { createTournament, getDefaultOptions, validateOptions } from '../../lib/tournaments/factory';
-import { saveTournamentState } from '../../lib/storage/localStorage';
+import { saveTournamentState, loadTournamentState } from '../../lib/storage/localStorage';
 import { POINTS_SYSTEM_PRESETS } from '../../lib/tournaments/pointsSystems';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 interface Props {
+  editingTournamentId?: string;
+  initialStep?: 'type' | 'options' | 'participants';
   onTournamentCreated: (id: string) => void;
   onCancel: () => void;
 }
 
 type Step = 'type' | 'options' | 'participants';
 
-export default function TournamentCreate({ onTournamentCreated, onCancel }: Props) {
+export default function TournamentCreate({
+  editingTournamentId,
+  initialStep,
+  onTournamentCreated,
+  onCancel
+}: Props) {
   const { t } = useTranslation();
-  const [step, setStep] = useState<Step>('type');
+  const [step, setStep] = useState<Step>(initialStep || 'type');
   const [tournamentType, setTournamentType] = useState<TournamentType | null>(null);
   const [options, setOptions] = useState<Partial<TournamentOptions>>(getDefaultOptions('single-elimination'));
   const [participantInput, setParticipantInput] = useState('');
   const [errors, setErrors] = useState<string[]>([]);
+  const isEditMode = !!editingTournamentId;
+
+  // Load existing tournament data in edit mode
+  useEffect(() => {
+    if (isEditMode && editingTournamentId) {
+      const state = loadTournamentState(editingTournamentId);
+      if (state) {
+        setTournamentType(state.type);
+        setOptions(state.options);
+      }
+    }
+  }, [isEditMode, editingTournamentId]);
 
   const handleTypeSelect = (type: TournamentType) => {
     setTournamentType(type);
@@ -79,13 +98,32 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
     }
 
     try {
-      const tournament = createTournament(options as TournamentOptions);
-      tournament.start();
+      if (isEditMode && editingTournamentId) {
+        // Update existing tournament
+        const existingState = loadTournamentState(editingTournamentId);
+        if (!existingState) {
+          setErrors([t('create.tournamentNotFound')]);
+          return;
+        }
 
-      const state = tournament.export();
-      saveTournamentState(state);
+        // Create updated state preserving the ID and tournament data
+        const updatedState = {
+          ...existingState,
+          options: options as TournamentOptions,
+        };
 
-      onTournamentCreated(tournament.getId());
+        saveTournamentState(updatedState);
+        onTournamentCreated(editingTournamentId);
+      } else {
+        // Create new tournament
+        const tournament = createTournament(options as TournamentOptions);
+        tournament.start();
+
+        const state = tournament.export();
+        saveTournamentState(state);
+
+        onTournamentCreated(tournament.getId());
+      }
     } catch (error) {
       setErrors([error instanceof Error ? error.message : t('create.createError')]);
     }
@@ -125,7 +163,9 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
         <div className="bg-white shadow rounded-lg p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">{t('create.title')}</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {isEditMode ? t('create.editTitle') : t('create.title')}
+            </h1>
             <Button
               variant="ghost"
               size="icon"
@@ -723,7 +763,7 @@ export default function TournamentCreate({ onTournamentCreated, onCancel }: Prop
                   disabled={(options.participantNames?.length || 0) < 2}
                   className="bg-green-600 hover:bg-green-700"
                 >
-                  {t('create.createTournament')}
+                  {isEditMode ? t('create.saveChanges') : t('create.createTournament')}
                 </Button>
               </div>
             </div>

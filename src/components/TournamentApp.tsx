@@ -37,10 +37,12 @@ function LoadingFallback() {
   );
 }
 
+type Step = 'type' | 'options' | 'participants';
+
 type View =
   | { type: 'landing' }
   | { type: 'dashboard' }
-  | { type: 'create' }
+  | { type: 'create'; editingId?: string; initialStep?: Step }
   | { type: 'tournament'; id: string };
 
 export default function TournamentApp() {
@@ -102,6 +104,10 @@ export default function TournamentApp() {
     setView({ type: 'dashboard' });
   }, [refreshTournaments]);
 
+  const handleEditTournament = useCallback((id: string, step: Step) => {
+    setView({ type: 'create', editingId: id, initialStep: step });
+  }, []);
+
   // Render based on current view
   if (view.type === 'landing') {
     return <LandingPage onEnter={handleEnterApp} />;
@@ -111,6 +117,8 @@ export default function TournamentApp() {
     return (
       <Suspense fallback={<LoadingFallback />}>
         <TournamentCreate
+          editingTournamentId={view.editingId}
+          initialStep={view.initialStep}
           onTournamentCreated={handleTournamentCreated}
           onCancel={handleCancelCreate}
         />
@@ -124,6 +132,7 @@ export default function TournamentApp() {
         <TournamentView
           tournamentId={view.id}
           onBack={handleBackToDashboard}
+          onEdit={handleEditTournament}
         />
       </Suspense>
     );
