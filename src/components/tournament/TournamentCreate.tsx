@@ -106,14 +106,54 @@ export default function TournamentCreate({
           return;
         }
 
-        // Create updated state preserving the ID and tournament data
-        const updatedState = {
-          ...existingState,
-          options: options as TournamentOptions,
-        };
+        // Check if any matches have been completed
+        const hasCompletedMatches = checkForCompletedMatches(existingState);
 
-        saveTournamentState(updatedState);
-        onTournamentCreated(editingTournamentId);
+        if (hasCompletedMatches) {
+          // Check if structural options have changed
+          const structuralChanges = detectStructuralChanges(
+            existingState.options,
+            options as TournamentOptions
+          );
+
+          if (structuralChanges.length > 0) {
+            setErrors([
+              t('create.cannotEditStructuralOptions'),
+              t('create.structuralChangesDetected', { changes: structuralChanges.join(', ') }),
+              t('create.matchesAlreadyCompleted')
+            ]);
+            return;
+          }
+
+          // Only non-structural options changed, update without regenerating
+          const updatedState = {
+            ...existingState,
+            options: options as TournamentOptions,
+            updatedAt: new Date().toISOString(),
+          };
+
+          saveTournamentState(updatedState);
+          onTournamentCreated(editingTournamentId);
+        } else {
+          // No completed matches - safe to regenerate tournament
+          // Create new tournament instance with updated options
+          const tournament = createTournament({
+            ...options,
+            type: existingState.type,
+          } as TournamentOptions);
+
+          // Preserve the original ID and creation date
+          (tournament as any).id = existingState.id;
+          (tournament as any).createdAt = new Date(existingState.createdAt);
+
+          // Start with new options (regenerates structure)
+          tournament.start();
+
+          const state = tournament.export();
+          saveTournamentState(state);
+
+          onTournamentCreated(editingTournamentId);
+        }
       } else {
         // Create new tournament
         const tournament = createTournament(options as TournamentOptions);
@@ -127,6 +167,82 @@ export default function TournamentCreate({
     } catch (error) {
       setErrors([error instanceof Error ? error.message : t('create.createError')]);
     }
+  };
+
+  // Helper function to check if any matches have been completed
+  const checkForCompletedMatches = (state: any): boolean => {
+    // Check different tournament types
+    switch (state.type) {
+      case 'single-elimination':
+        return state.bracket.some((match: any) => match.status === 'completed');
+      case 'double-elimination':
+        return (
+          state.winnersBracket.some((match: any) => match.status === 'completed') ||
+          state.losersBracket.some((match: any) => match.status === 'completed')
+        );
+      case 'round-robin':
+        return state.matches.some((match: any) => match.status === 'completed');
+      case 'swiss':
+        return state.rounds.some((round: any[]) =>
+          round.some((match: any) => match.status === 'completed')
+        );
+      case 'free-for-all':
+        return state.rounds.some((round: any[]) =>
+          round.some((match: any) => match.status === 'completed')
+        );
+      default:
+        return false;
+    }
+  };
+
+  // Helper function to detect structural changes
+  const detectStructuralChanges = (
+    oldOptions: TournamentOptions,
+    newOptions: TournamentOptions
+  ): string[] => {
+    const changes: string[] = [];
+
+    // Check participant changes
+    if (JSON.stringify(oldOptions.participantNames) !== JSON.stringify(newOptions.participantNames)) {
+      changes.push(t('create.participantList'));
+    }
+
+    // Check match type changes
+    if (oldOptions.matchType !== newOptions.matchType) {
+      changes.push(t('create.matchType'));
+    }
+
+    // Check players per match
+    if (oldOptions.playersPerMatch !== newOptions.playersPerMatch) {
+      changes.push(t('create.playersPerMatch'));
+    }
+
+    // Type-specific structural options
+    if (oldOptions.type === 'single-elimination' && newOptions.type === 'single-elimination') {
+      if (oldOptions.thirdPlaceMatch !== newOptions.thirdPlaceMatch) {
+        changes.push(t('create.thirdPlaceMatch'));
+      }
+    }
+
+    if (oldOptions.type === 'double-elimination' && newOptions.type === 'double-elimination') {
+      if (oldOptions.splitStart !== newOptions.splitStart) {
+        changes.push(t('create.splitStart'));
+      }
+    }
+
+    if (oldOptions.type === 'round-robin' && newOptions.type === 'round-robin') {
+      if (oldOptions.rounds !== newOptions.rounds) {
+        changes.push(t('create.numberOfRounds'));
+      }
+    }
+
+    if (oldOptions.type === 'free-for-all' && newOptions.type === 'free-for-all') {
+      if ((oldOptions as any).participantsPerMatch !== (newOptions as any).participantsPerMatch) {
+        changes.push(t('create.participantsPerMatch'));
+      }
+    }
+
+    return changes;
   };
 
   const tournamentTypes: { type: TournamentType; label: string; description: string }[] = [

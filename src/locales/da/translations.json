@@ -73,7 +73,17 @@
     "errorTitle": "Ret venligst følgende fejl:",
     "duplicateNameError": "Deltagernavne skal være unikke",
     "createError": "Kunne ikke oprette turnering",
-    "tournamentNotFound": "Turneringen blev ikke fundet"
+    "tournamentNotFound": "Turneringen blev ikke fundet",
+    "cannotEditStructuralOptions": "Kan ikke redigere strukturelle indstillinger efter kampe er afsluttet",
+    "structuralChangesDetected": "Strukturelle ændringer opdaget: {{changes}}",
+    "matchesAlreadyCompleted": "Nogle kampe er allerede afsluttet. Kun ikke-strukturelle indstillinger (som navn, scoringsregler) kan redigeres.",
+    "participantList": "Deltagerliste",
+    "matchType": "Kamptype",
+    "playersPerMatch": "Spillere pr. kamp",
+    "thirdPlaceMatch": "Kamp om 3. pladsen",
+    "splitStart": "Delt start",
+    "numberOfRounds": "Antal runder",
+    "participantsPerMatch": "Deltagere pr. kamp"
   },
   "options": {
     "thirdPlaceMatch": "Inkluder kamp om 3. pladsen",

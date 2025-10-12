@@ -73,7 +73,17 @@
     "errorTitle": "Please fix the following errors:",
     "duplicateNameError": "Participant names must be unique",
     "createError": "Failed to create tournament",
-    "tournamentNotFound": "Tournament not found"
+    "tournamentNotFound": "Tournament not found",
+    "cannotEditStructuralOptions": "Cannot edit structural options after matches have been completed",
+    "structuralChangesDetected": "Structural changes detected: {{changes}}",
+    "matchesAlreadyCompleted": "Some matches have already been completed. Only non-structural options (like name, scoring rules) can be edited.",
+    "participantList": "Participant list",
+    "matchType": "Match type",
+    "playersPerMatch": "Players per match",
+    "thirdPlaceMatch": "Third place match",
+    "splitStart": "Split start",
+    "numberOfRounds": "Number of rounds",
+    "participantsPerMatch": "Participants per match"
   },
   "options": {
     "thirdPlaceMatch": "Include 3rd place match",
