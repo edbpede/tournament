@@ -10,9 +10,22 @@ import {
   importTournamentFromFile,
   downloadTournamentExport,
   getStorageInfo,
+  loadTournamentState,
+  saveTournamentState,
 } from '../../lib/storage/localStorage';
+import { restoreTournament } from '../../lib/tournaments/factory';
 import LanguageSwitcher from '../LanguageSwitcher';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Props {
   tournaments: TournamentListItem[];
@@ -20,6 +33,12 @@ interface Props {
   onViewTournament: (id: string) => void;
   onDeleteTournament: (id: string) => void;
   onRefresh: () => void;
+}
+
+interface ResetDialogState {
+  isOpen: boolean;
+  tournamentId: string | null;
+  tournamentName: string | null;
 }
 
 export default function TournamentDashboard({
@@ -31,6 +50,11 @@ export default function TournamentDashboard({
 }: Props) {
   const { t } = useTranslation();
   const [importing, setImporting] = useState(false);
+  const [resetDialog, setResetDialog] = useState<ResetDialogState>({
+    isOpen: false,
+    tournamentId: null,
+    tournamentName: null,
+  });
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -58,6 +82,48 @@ export default function TournamentDashboard({
       alert(t('dashboard.exportError'));
       console.error(error);
     }
+  };
+
+  const handleResetClick = (id: string, name: string) => {
+    setResetDialog({
+      isOpen: true,
+      tournamentId: id,
+      tournamentName: name,
+    });
+  };
+
+  const handleResetConfirm = () => {
+    if (!resetDialog.tournamentId) return;
+
+    try {
+      // Load tournament state
+      const state = loadTournamentState(resetDialog.tournamentId);
+      if (!state) {
+        alert(t('dashboard.resetError'));
+        return;
+      }
+
+      // Restore tournament instance
+      const tournament = restoreTournament(state);
+
+      // Call reset method
+      tournament.reset();
+
+      // Save the reset state
+      const resetState = tournament.export();
+      saveTournamentState(resetState);
+
+      // Close dialog and refresh
+      setResetDialog({ isOpen: false, tournamentId: null, tournamentName: null });
+      onRefresh();
+    } catch (error) {
+      alert(t('dashboard.resetError'));
+      console.error(error);
+    }
+  };
+
+  const handleResetCancel = () => {
+    setResetDialog({ isOpen: false, tournamentId: null, tournamentName: null });
   };
 
   const formatDate = (dateString: string) => {
@@ -199,8 +265,30 @@ export default function TournamentDashboard({
                         <Button
                           variant="outline"
                           size="sm"
+                          onClick={() => handleResetClick(tournament.id, tournament.name)}
+                          title={t('common.reset')}
+                          className="text-orange-700 hover:bg-orange-50 hover:text-orange-700"
+                        >
+                          <svg
+                            className="h-4 w-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                            />
+                          </svg>
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => handleExport(tournament.id)}
-                          title="Export"
+                          title={t('common.export')}
                         >
                           <svg
                             className="h-4 w-4"
@@ -221,7 +309,7 @@ export default function TournamentDashboard({
                           variant="outline"
                           size="sm"
                           onClick={() => onDeleteTournament(tournament.id)}
-                          title="Delete"
+                          title={t('common.delete')}
                           className="text-red-700 hover:bg-red-50 hover:text-red-700"
                         >
                           <svg
@@ -246,6 +334,26 @@ export default function TournamentDashboard({
             </ul>
           </div>
         )}
+
+        {/* Reset Confirmation Dialog */}
+        <AlertDialog open={resetDialog.isOpen} onOpenChange={(open) => !open && handleResetCancel()}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t('dashboard.resetConfirm')}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t('dashboard.resetConfirmDescription', { name: resetDialog.tournamentName })}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={handleResetCancel}>
+                {t('common.cancel')}
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={handleResetConfirm} className="bg-orange-600 hover:bg-orange-700">
+                {t('common.reset')}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

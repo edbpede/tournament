@@ -13,6 +13,7 @@
     "save": "Gem",
     "close": "Luk",
     "confirm": "Bekræft",
+    "reset": "Nulstil",
     "wins": "sejre",
     "tournament": "Turnering",
     "tournaments": "Turneringer"
@@ -30,7 +31,10 @@
     "importError": "Importen mislykkedes. Kontrollér filformatet.",
     "exportError": "Eksporten mislykkedes.",
     "deleteConfirm": "Er du sikker på, at du vil slette denne turnering?",
-    "deleteConfirmDescription": "Denne handling kan ikke fortrydes. Turneringen og alle dens data vil blive slettet permanent."
+    "deleteConfirmDescription": "Denne handling kan ikke fortrydes. Turneringen og alle dens data vil blive slettet permanent.",
+    "resetConfirm": "Nulstil turnering?",
+    "resetConfirmDescription": "Dette vil fjerne alle kampresultater og nulstille \"{{name}}\" til dens oprindelige tilstand. Deltagere og turneringsindstillinger vil blive bevaret. Denne handling kan ikke fortrydes.",
+    "resetError": "Kunne ikke nulstille turnering."
   },
   "status": {
     "completed": "Afsluttet",
@@ -162,7 +166,11 @@
     "tournamentNotFound": "Turneringen blev ikke fundet",
     "loadingTournament": "Indlæser turnering...",
     "loadError": "Kunne ikke indlæse turnering",
-    "resultError": "Kunne ikke registrere resultat"
+    "resultError": "Kunne ikke registrere resultat",
+    "resetTournament": "Nulstil",
+    "resetConfirm": "Nulstil turnering?",
+    "resetConfirmDescription": "Dette vil fjerne alle kampresultater og stillinger og returnere turneringen til dens oprindelige tilstand. Deltagere og turneringsindstillinger vil blive bevaret. Denne handling kan ikke fortrydes.",
+    "resetError": "Kunne ikke nulstille turnering."
   },
   "language": {
     "label": "Sprog",

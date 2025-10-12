@@ -555,4 +555,29 @@ export class SwissTournament extends BaseTournament<SwissOptions, SwissState> {
   public getNumberOfRounds(): number {
     return this.numberOfRounds;
   }
+
+  public reset(): void {
+    // Clear all rounds and participant scores
+    this.rounds = [];
+    this.currentRound = 0;
+    this.completed = false;
+
+    // Reset participant scores
+    this.participantScores = new Map();
+    this.participants.forEach((p) => {
+      this.participantScores.set(p.id, {
+        participantId: p.id,
+        matchPoints: 0,
+        gamePoints: 0,
+        opponentIds: [],
+        matchesPlayed: 0,
+      });
+    });
+
+    // Generate first round pairings
+    this.generateNextRound();
+    this.currentRound = 1;
+
+    this.touch();
+  }
 }

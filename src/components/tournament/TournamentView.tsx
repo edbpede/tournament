@@ -20,6 +20,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import SingleEliminationBracket from './brackets/SingleEliminationBracket';
 import DoubleEliminationBracket from './brackets/DoubleEliminationBracket';
 import MatchList from './MatchList';
@@ -40,6 +50,7 @@ export default function TournamentView({ tournamentId, onBack, onEdit }: Props) 
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
   // Load tournament
   useEffect(() => {
@@ -91,6 +102,29 @@ export default function TournamentView({ tournamentId, onBack, onEdit }: Props) 
     if (match.status !== 'completed') {
       setSelectedMatch(match);
     }
+  };
+
+  const handleResetClick = () => {
+    setResetDialogOpen(true);
+  };
+
+  const handleResetConfirm = () => {
+    if (!tournament) return;
+
+    try {
+      // Call reset method
+      tournament.reset();
+
+      // Save the reset state and refresh
+      refreshTournament();
+      setResetDialogOpen(false);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : t('view.resetError'));
+    }
+  };
+
+  const handleResetCancel = () => {
+    setResetDialogOpen(false);
   };
 
   const isMultiPlayerMatch = (match: Match): boolean => {
@@ -199,6 +233,30 @@ export default function TournamentView({ tournamentId, onBack, onEdit }: Props) 
                 className="h-8"
               >
                 {t('view.editParticipants')}
+              </Button>
+
+              <div className="h-6 w-px bg-gray-300 mx-1"></div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleResetClick}
+                className="h-8 text-orange-700 hover:bg-orange-50 hover:text-orange-700"
+              >
+                <svg
+                  className="h-4 w-4 mr-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+                {t('view.resetTournament')}
               </Button>
             </div>
           </div>
@@ -337,6 +395,26 @@ export default function TournamentView({ tournamentId, onBack, onEdit }: Props) 
           onSave={handleRecordResult}
           onCancel={() => setSelectedMatch(null)}
         />
+
+        {/* Reset Confirmation Dialog */}
+        <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t('view.resetConfirm')}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t('view.resetConfirmDescription')}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={handleResetCancel}>
+                {t('common.cancel')}
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={handleResetConfirm} className="bg-orange-600 hover:bg-orange-700">
+                {t('common.reset')}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

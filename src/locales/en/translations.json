@@ -13,6 +13,7 @@
     "save": "Save",
     "close": "Close",
     "confirm": "Confirm",
+    "reset": "Reset",
     "wins": "wins",
     "tournament": "Tournament",
     "tournaments": "Tournaments"
@@ -30,7 +31,10 @@
     "importError": "Failed to import tournament. Please check the file format.",
     "exportError": "Failed to export tournament.",
     "deleteConfirm": "Are you sure you want to delete this tournament?",
-    "deleteConfirmDescription": "This action cannot be undone. This will permanently delete the tournament and all its data."
+    "deleteConfirmDescription": "This action cannot be undone. This will permanently delete the tournament and all its data.",
+    "resetConfirm": "Reset tournament?",
+    "resetConfirmDescription": "This will clear all match results and reset \"{{name}}\" to its initial state. Participants and tournament settings will be kept. This action cannot be undone.",
+    "resetError": "Failed to reset tournament."
   },
   "status": {
     "completed": "Completed",
@@ -162,7 +166,11 @@
     "tournamentNotFound": "Tournament not found",
     "loadingTournament": "Loading tournament...",
     "loadError": "Failed to load tournament",
-    "resultError": "Failed to record result"
+    "resultError": "Failed to record result",
+    "resetTournament": "Reset",
+    "resetConfirm": "Reset tournament?",
+    "resetConfirmDescription": "This will clear all match results and standings, returning the tournament to its initial state. Participants and tournament settings will be kept. This action cannot be undone.",
+    "resetError": "Failed to reset tournament."
   },
   "language": {
     "label": "Language",

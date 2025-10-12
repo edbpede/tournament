@@ -48,6 +48,7 @@ export abstract class BaseTournament<
   abstract getStandings(): Standing[];
   abstract exportState(): TState;
   abstract importState(state: TState): void;
+  abstract reset(): void;
 
   // Common implementation methods
 

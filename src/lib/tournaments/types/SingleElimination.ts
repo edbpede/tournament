@@ -542,4 +542,16 @@ export class SingleEliminationTournament extends BaseTournament<
   public getThirdPlaceMatch(): Match | undefined {
     return this.thirdPlaceMatch;
   }
+
+  public reset(): void {
+    // Clear all match results and regenerate bracket
+    this.bracket = [];
+    this.thirdPlaceMatch = undefined;
+    this.completed = false;
+
+    // Regenerate the initial bracket structure
+    this.generateBracket();
+
+    this.touch();
+  }
 }

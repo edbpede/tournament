@@ -515,4 +515,24 @@ export class DoubleEliminationTournament extends BaseTournament<
   public getGrandFinalReset(): Match | undefined {
     return this.grandFinalReset;
   }
+
+  public reset(): void {
+    // Clear all match results and regenerate brackets
+    this.winnersBracket = [];
+    this.losersBracket = [];
+    this.grandFinal = undefined;
+    this.grandFinalReset = undefined;
+    this.completed = false;
+
+    // Reset loss tracking
+    this.participantLosses = new Map();
+    this.participants.forEach((p) => {
+      this.participantLosses.set(p.id, 0);
+    });
+
+    // Regenerate the initial bracket structure
+    this.generateBrackets();
+
+    this.touch();
+  }
 }

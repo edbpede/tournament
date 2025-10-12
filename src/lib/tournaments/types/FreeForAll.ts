@@ -387,4 +387,18 @@ export class FreeForAllTournament extends BaseTournament<
   public getEliminatedParticipants(): string[] {
     return Array.from(this.eliminatedParticipants);
   }
+
+  public reset(): void {
+    // Clear all rounds and eliminated participants
+    this.rounds = [];
+    this.currentRound = 0;
+    this.eliminatedParticipants = new Set();
+    this.completed = false;
+
+    // Generate first round with all participants
+    this.generateRound(this.participants.map((p) => p.id));
+    this.currentRound = 1;
+
+    this.touch();
+  }
 }

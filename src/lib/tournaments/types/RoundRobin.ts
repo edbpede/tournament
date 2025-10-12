@@ -370,4 +370,17 @@ export class RoundRobinTournament extends BaseTournament<
   public getTotalRounds(): number {
     return this.options.rounds;
   }
+
+  public reset(): void {
+    // Clear all match results and regenerate matches
+    this.matches = [];
+    this.currentRound = 0;
+    this.completed = false;
+
+    // Regenerate the initial match structure
+    this.generateMatches();
+    this.currentRound = 1;
+
+    this.touch();
+  }
 }
